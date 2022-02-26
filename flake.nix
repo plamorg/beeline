@@ -38,6 +38,17 @@
                     xorg.libXmu
                     xorg.libxcb
                     xorg.libXft
+                    libGL
+                    libva
+                    pipewire.lib
+                    libGLU
+                    mesa.drivers
+                    mesa.llvmPackages.llvm.lib
+                    vulkan-loader
+                    freeglut
+                    libvdpau
+                    clang
+                    lld
                 ];
             in
                 rec {
@@ -57,6 +68,11 @@
 
                     devShell = pkgs.mkShell {
                         nativeBuildInputs = with pkgs; [ rustc cargo rust-analyzer rustfmt ] ++ buildInputs;
+                        shellHook = ''export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath (with pkgs; [
+                            alsa-lib
+                            udev
+                            vulkan-loader
+                        ])}"'';
                     };
                 }
         );

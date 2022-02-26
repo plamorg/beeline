@@ -54,7 +54,7 @@ fn move_player(
     windows: Res<Windows>,
     time: Res<Time>,
     camera: Query<&Camera, With<MainCamera>>,
-    mut transform: Query<&mut Transform, With<Player>>,
+    mut transform: Query<&mut Transform, (With<Player>, Without<MainCamera>)>,
 ) {
     let camera = camera.single();
     let window = windows.get(camera.window).unwrap();
