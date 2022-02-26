@@ -1,6 +1,5 @@
-use bevy::math::Vec2;
-
 use crate::util::polar_to_cartesian;
+use bevy::math::Vec2;
 
 /// Returns the transform change that should be applied, *without* delta-time.
 /// Pursue level 1, i.e. velocity to hit a stationary target.

@@ -1,14 +1,14 @@
+use crate::{camera::MainCamera, util::polar_to_cartesian, AppState};
 use benimator::{Play, SpriteSheetAnimation};
 use bevy::prelude::*;
 use std::{f32::consts::PI, time::Duration};
-
-use crate::{camera::MainCamera, util::polar_to_cartesian};
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player).add_system(move_player);
+        app.add_system_set(SystemSet::on_enter(AppState::Game).with_system(spawn_player))
+            .add_system_set(SystemSet::on_update(AppState::Game).with_system(move_player));
     }
 }
 
