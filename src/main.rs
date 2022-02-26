@@ -1,5 +1,6 @@
 mod camera;
 mod player;
+mod util;
 
 use bevy::prelude::*;
 

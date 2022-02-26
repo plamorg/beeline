@@ -11,12 +11,7 @@ impl Plugin for CameraPlugin {
 }
 
 #[derive(Component)]
-struct MainCamera;
-
-impl MainCamera {
-    // Interpolation value for following the player
-    const INTERPOLATION: f32 = 0.1;
-}
+pub struct MainCamera;
 
 fn spawn_camera(mut commands: Commands) {
     commands
@@ -31,13 +26,5 @@ fn follow_player(
     let mut camera_transform = camera_transform.single_mut();
     let player_transform = player_transform.single();
 
-    // Set camera translation without overwriting z-ordering
-    camera_transform.translation = camera_transform
-        .translation
-        .truncate()
-        .lerp(
-            player_transform.translation.truncate(),
-            MainCamera::INTERPOLATION,
-        )
-        .extend(0.0);
+    camera_transform.translation = player_transform.translation;
 }
