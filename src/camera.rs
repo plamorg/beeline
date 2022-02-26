@@ -14,8 +14,11 @@ impl Plugin for CameraPlugin {
 pub struct MainCamera;
 
 fn spawn_camera(mut commands: Commands) {
+    let mut orthographic_camera_bundle = OrthographicCameraBundle::new_2d();
+    orthographic_camera_bundle.orthographic_projection.scale = 0.5;
+
     commands
-        .spawn_bundle(OrthographicCameraBundle::new_2d())
+        .spawn_bundle(orthographic_camera_bundle)
         .insert(MainCamera);
 }
 
@@ -26,5 +29,9 @@ fn follow_player(
     let mut camera_transform = camera_transform.single_mut();
     let player_transform = player_transform.single();
 
-    camera_transform.translation = player_transform.translation;
+    camera_transform.translation = camera_transform
+        .translation
+        .truncate()
+        .lerp(player_transform.translation.truncate(), 0.1)
+        .extend(0.0);
 }

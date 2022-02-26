@@ -176,7 +176,22 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 name = "beeline"
 version = "0.1.0"
 dependencies = [
+ "benimator",
  "bevy",
+]
+
+[[package]]
+name = "benimator"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c0ed7d6dbdab003836b8000e878ed41970126e5491ebdb27489cb04b025f579"
+dependencies = [
+ "bevy_app",
+ "bevy_asset",
+ "bevy_core",
+ "bevy_ecs",
+ "bevy_reflect",
+ "bevy_sprite",
 ]
 
 [[package]]
