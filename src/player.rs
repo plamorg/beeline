@@ -1,7 +1,11 @@
-use crate::{camera::MainCamera, util::polar_to_cartesian, AppState};
-use benimator::{Play, SpriteSheetAnimation};
+use crate::{
+    camera::MainCamera,
+    util::{polar_to_cartesian, AnimatedSprite},
+    AppState,
+};
+use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
-use std::{f32::consts::PI, time::Duration};
+use std::f32::consts::PI;
 
 pub struct PlayerPlugin;
 
@@ -31,25 +35,17 @@ pub fn spawn_player(
     // Define player size
     let size = Vec2::splat(Player::SIZE);
 
-    let animation_handle = animations.add(SpriteSheetAnimation::from_range(
-        0..=5,
-        Duration::from_millis(100),
-    ));
-
     // Spawn player
     commands
-        .spawn_bundle(SpriteSheetBundle {
-            texture_atlas: textures.add(TextureAtlas::from_grid(
-                asset_server.load("bee.png"),
-                size,
-                6,
-                1,
-            )),
-            transform: Transform::from_translation(start_location.extend(0.0)),
-            ..SpriteSheetBundle::default()
-        })
-        .insert(animation_handle)
-        .insert(Play)
+        .spawn_bundle(AnimatedSprite::new(
+            &mut animations,
+            &mut textures,
+            &asset_server,
+            "bee.png",
+            6,
+            size,
+            start_location,
+        ))
         .insert(Player);
 }
 
