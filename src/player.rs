@@ -7,8 +7,7 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::Game).with_system(spawn_player))
-            .add_system_set(SystemSet::on_update(AppState::Game).with_system(move_player));
+        app.add_system_set(SystemSet::on_update(AppState::Game).with_system(move_player));
     }
 }
 
@@ -20,11 +19,14 @@ impl Player {
     const VELOCITY: f32 = 500.0;
 }
 
-fn spawn_player(
+// Spawn the player in the given start location
+// This function should only be called by the world plugin
+pub fn spawn_player(
     mut commands: Commands,
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
     mut textures: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
+    start_location: Vec2,
 ) {
     // Define player size
     let size = Vec2::splat(Player::SIZE);
@@ -43,6 +45,7 @@ fn spawn_player(
                 6,
                 1,
             )),
+            transform: Transform::from_translation(start_location.extend(0.0)),
             ..SpriteSheetBundle::default()
         })
         .insert(animation_handle)
