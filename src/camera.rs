@@ -33,5 +33,5 @@ fn follow_player(
         .translation
         .truncate()
         .lerp(player_transform.translation.truncate(), 0.1)
-        .extend(0.0);
+        .extend(camera_transform.translation.z);
 }

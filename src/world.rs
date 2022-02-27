@@ -1,7 +1,8 @@
-use crate::{enemy::Enemy, player, AppState};
+use crate::{enemy::Enemy, player, util::AnimatedSprite, AppState};
 use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
 use std::{
+    f32::consts::PI,
     fs::File,
     io::{self, BufRead, BufReader},
     path::Path,
@@ -96,8 +97,8 @@ impl Plugin for WorldPlugin {
 fn spawn_world(
     mut commands: Commands,
     world: Res<World>,
-    animations: ResMut<Assets<SpriteSheetAnimation>>,
-    textures: ResMut<Assets<TextureAtlas>>,
+    mut animations: ResMut<Assets<SpriteSheetAnimation>>,
+    mut textures: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
 ) {
     let tile_size = Vec2::splat(Tile::SIZE);
@@ -119,24 +120,38 @@ fn spawn_world(
                         ..SpriteBundle::default()
                     });
                 }
-                Some(Tile::Spawner(spawner)) => {
-                    // TODO: Set sprite differently depending on projectile (rather than color)
-                    let color = match spawner.enemy {
-                        Enemy::Missile => Color::CYAN,
-                        Enemy::Laser { .. } => Color::GREEN,
-                    };
-                    commands
-                        .spawn_bundle(SpriteBundle {
-                            sprite: Sprite {
-                                color,
-                                custom_size: Some(tile_size),
-                                ..Sprite::default()
-                            },
-                            transform,
-                            ..SpriteBundle::default()
-                        })
-                        .insert(spawner.clone());
-                }
+                Some(Tile::Spawner(spawner)) => match spawner.enemy {
+                    Enemy::Missile => {
+                        commands
+                            .spawn_bundle(SpriteBundle {
+                                sprite: Sprite {
+                                    custom_size: Some(tile_size),
+                                    ..Sprite::default()
+                                },
+                                texture: asset_server.load("missile-spawner.png"),
+                                transform,
+                                ..SpriteBundle::default()
+                            })
+                            .insert(spawner.clone());
+                    }
+                    Enemy::Laser { angle, .. } => {
+                        commands
+                            .spawn_bundle(AnimatedSprite::new(
+                                &mut animations,
+                                &mut textures,
+                                &asset_server,
+                                "laser-spawner.png",
+                                2,
+                                tile_size,
+                                Transform {
+                                    translation: transform.translation,
+                                    rotation: Quat::from_rotation_z(angle - PI / 2.0),
+                                    ..Transform::default()
+                                },
+                            ))
+                            .insert(spawner.clone());
+                    }
+                },
                 None => {}
             }
         }

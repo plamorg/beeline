@@ -23,7 +23,7 @@ impl<'a> AnimatedSprite {
         path: P,
         frames: usize,
         size: Vec2,
-        position: Vec2,
+        transform: Transform,
     ) -> Self {
         let animation_handle = animations.add(SpriteSheetAnimation::from_range(
             0..=(frames - 1),
@@ -37,7 +37,7 @@ impl<'a> AnimatedSprite {
                 8,
                 1,
             )),
-            transform: Transform::from_translation(position.extend(0.0)),
+            transform,
             ..SpriteSheetBundle::default()
         };
 

@@ -44,7 +44,7 @@ pub fn spawn_player(
             "bee.png",
             6,
             size,
-            start_location,
+            Transform::from_translation(start_location.extend(0.0)),
         ))
         .insert(Player);
 }
