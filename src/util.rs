@@ -1,4 +1,4 @@
-use benimator::{Play, SpriteSheetAnimation};
+use benimator::{AnimationMode, Play, SpriteSheetAnimation};
 use bevy::{asset::AssetPath, prelude::*};
 use std::time::Duration;
 
@@ -14,7 +14,6 @@ pub struct AnimatedSprite {
     #[bundle]
     sprite_sheet_bundle: SpriteSheetBundle,
 }
-
 impl<'a> AnimatedSprite {
     pub fn new<P: Into<AssetPath<'a>>>(
         animations: &mut ResMut<Assets<SpriteSheetAnimation>>,
@@ -24,17 +23,24 @@ impl<'a> AnimatedSprite {
         frames: usize,
         size: Vec2,
         transform: Transform,
+        delay: Duration,
+        mode: AnimationMode,
     ) -> Self {
-        let animation_handle = animations.add(SpriteSheetAnimation::from_range(
-            0..=(frames - 1),
-            Duration::from_millis(100),
-        ));
+        let animation_handle = animations.add({
+            let sheet = SpriteSheetAnimation::from_range(0..=(frames - 1), delay);
+            match mode {
+                AnimationMode::Once => sheet.once(),
+                AnimationMode::Repeat => sheet.repeat(),
+                AnimationMode::PingPong => sheet.ping_pong(),
+                _ => unimplemented!(),
+            }
+        });
 
         let sprite_sheet_bundle = SpriteSheetBundle {
             texture_atlas: textures.add(TextureAtlas::from_grid(
                 asset_server.load(path),
                 size,
-                8,
+                frames,
                 1,
             )),
             transform,
