@@ -20,8 +20,12 @@ struct Spawner {
 }
 
 impl Spawner {
-    // Create spawner given an enemy and cooldown (in seconds)
-    fn new(enemy: Enemy, cooldown: f32) -> Self {
+    // Create spawner given an enemy
+    fn new(enemy: Enemy) -> Self {
+        let cooldown = match enemy {
+            Enemy::Missile => Enemy::MISSILE_COOLDOWN,
+            Enemy::Laser { .. } => Enemy::LASER_COOLDOWN,
+        };
         Self {
             enemy,
             timer: Timer::from_seconds(cooldown, true),
@@ -60,11 +64,10 @@ impl World {
                 let tile = match value.chars().next().unwrap() {
                     '.' => None,
                     '#' => Some(Tile::Wall),
-                    'L' => Some(Tile::Spawner(Spawner::new(
-                        Enemy::new_laser((&value[2..]).parse::<f32>().unwrap()),
-                        0.1,
-                    ))),
-                    'M' => Some(Tile::Spawner(Spawner::new(Enemy::Missile, 1.0))),
+                    'L' => Some(Tile::Spawner(Spawner::new(Enemy::Laser {
+                        angle: (&value[2..]).parse::<f32>().unwrap(),
+                    }))),
+                    'M' => Some(Tile::Spawner(Spawner::new(Enemy::Missile))),
                     '*' => {
                         // The * character indicates player's spawn location
                         start = Some((j, i));
@@ -196,9 +199,9 @@ fn spawn_projectiles(
                     );
                 }
             }
-            Enemy::Laser { velocity, angle } => {
+            Enemy::Laser { angle } => {
                 if spawner.timer.tick(time.delta()).just_finished() {
-                    Enemy::Laser { velocity, angle }.spawn(
+                    Enemy::Laser { angle }.spawn(
                         &mut commands,
                         &mut animations,
                         &mut textures,
