@@ -1,6 +1,7 @@
 #![allow(clippy::type_complexity)]
 
 mod camera;
+mod collision;
 mod enemy;
 mod menu;
 mod player;
@@ -12,6 +13,7 @@ use benimator::AnimationPlugin;
 use bevy::prelude::*;
 
 use camera::CameraPlugin;
+use collision::CollisionPlugin;
 use enemy::EnemyPlugin;
 use menu::MenuPlugin;
 use player::PlayerPlugin;
@@ -40,6 +42,7 @@ fn main() {
         .add_plugin(MenuPlugin)
         .add_plugin(AnimationPlugin::default())
         .add_plugin(CameraPlugin)
+        .add_plugin(CollisionPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(WorldPlugin)

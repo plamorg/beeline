@@ -3,6 +3,7 @@ use crate::{
 };
 use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
+use impacted::CollisionShape;
 use std::f32::consts::PI;
 
 const LASER_SCALE_INTERPOLATION: f32 = 0.08;
@@ -46,16 +47,17 @@ impl Bullet {
 #[derive(Component, Clone, Debug)]
 pub enum Enemy {
     Missile,
-    Laser { velocity: f32, angle: f32 },
+    Laser { angle: f32 },
 }
 
 impl Enemy {
-    pub fn new_laser(angle: f32) -> Self {
-        Self::Laser {
-            velocity: 300.0,
-            angle,
-        }
-    }
+    const MISSILE_SIZE: (f32, f32) = (24.0, 24.0);
+    const MISSILE_VELOCITY: f32 = 400.0;
+    pub const MISSILE_COOLDOWN: f32 = 1.0;
+
+    const LASER_SIZE: (f32, f32) = (12.0, 24.0);
+    const LASER_VELOCITY: f32 = 300.0;
+    pub const LASER_COOLDOWN: f32 = 0.1;
 
     pub fn spawn(
         &self,
@@ -65,8 +67,8 @@ impl Enemy {
         asset_server: &Res<AssetServer>,
         spawn_position: Vec2,
     ) {
-        // Set z-ordering to 1.0 to ensure that enemies are spawned above their respective spawner
-        let spawn_position = spawn_position.extend(1.0);
+        // Set z-ordering to 2.0 to ensure that enemies are spawned above the player and spawners
+        let spawn_position = spawn_position.extend(2.0);
         match self {
             Enemy::Missile => {
                 commands
@@ -76,13 +78,17 @@ impl Enemy {
                         asset_server,
                         "rocket.png",
                         8,
-                        Vec2::splat(24.0),
+                        Self::MISSILE_SIZE.into(),
                         Transform::from_translation(spawn_position),
                     ))
-                    .insert(Pursuer::new(400.0))
+                    .insert(CollisionShape::new_rectangle(
+                        Self::MISSILE_SIZE.0,
+                        Self::MISSILE_SIZE.1,
+                    ))
+                    .insert(Pursuer::new(Self::MISSILE_VELOCITY))
                     .insert(self.clone());
             }
-            Enemy::Laser { velocity, angle } => {
+            Enemy::Laser { angle } => {
                 commands
                     .spawn_bundle(AnimatedSprite::new(
                         animations,
@@ -90,14 +96,18 @@ impl Enemy {
                         asset_server,
                         "laser.png",
                         4,
-                        Vec2::new(12.0, 24.0),
+                        Self::LASER_SIZE.into(),
                         Transform {
                             translation: spawn_position,
                             rotation: Quat::from_rotation_z(*angle - PI / 2.0),
                             scale: Vec3::ZERO,
                         },
                     ))
-                    .insert(Bullet::new(*velocity, *angle))
+                    .insert(CollisionShape::new_rectangle(
+                        Self::LASER_SIZE.0,
+                        Self::LASER_SIZE.1,
+                    ))
+                    .insert(Bullet::new(Self::LASER_VELOCITY, *angle))
                     .insert(self.clone());
             }
         }

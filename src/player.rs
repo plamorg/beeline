@@ -1,17 +1,23 @@
 use crate::{
     camera::MainCamera,
+    enemy::Enemy,
     util::{polar_to_cartesian, AnimatedSprite},
     AppState,
 };
 use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
+use impacted::CollisionShape;
 use std::f32::consts::PI;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_update(AppState::Game).with_system(move_player));
+        app.add_system_set(
+            SystemSet::on_update(AppState::Game)
+                .with_system(move_player)
+                .with_system(detect_collision),
+        );
     }
 }
 
@@ -44,8 +50,9 @@ pub fn spawn_player(
             "bee.png",
             6,
             size,
-            Transform::from_translation(start_location.extend(0.0)),
+            Transform::from_translation(start_location.extend(1.0)),
         ))
+        .insert(CollisionShape::new_rectangle(size.x, size.y))
         .insert(Player);
 }
 
@@ -75,5 +82,19 @@ fn move_player(
         transform.translation.y += velocity.y;
 
         transform.rotation = Quat::from_rotation_z(velocity_angle - PI / 2.0);
+    }
+}
+
+fn detect_collision(
+    enemies: Query<&CollisionShape, (With<Enemy>, Changed<CollisionShape>)>,
+    player: Query<&CollisionShape, (With<Player>, Changed<CollisionShape>)>,
+) {
+    if let Ok(player) = player.get_single() {
+        for enemy in enemies.iter() {
+            if player.is_collided_with(enemy) {
+                println!("Player has collided with enemy");
+                // TODO: Implement logic for what happens upon collision
+            }
+        }
     }
 }
