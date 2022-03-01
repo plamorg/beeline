@@ -1,4 +1,4 @@
-use crate::{AppState, ACTIVE_BUTTON_COLOR, NORMAL_BUTTON_COLOR};
+use crate::{ui::GameFont, AppState};
 use bevy::prelude::*;
 
 pub struct MenuPlugin;
@@ -10,11 +10,15 @@ impl Plugin for MenuPlugin {
     }
 }
 
-fn create_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+#[derive(Component)]
+enum ButtonType {
+    Play,
+    Upgrades,
+}
+
+fn create_menu(mut commands: Commands, font: Res<GameFont>) {
     commands.spawn_bundle(UiCameraBundle::default());
     commands.insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.4)));
-
-    let font = asset_server.load("FrancoisOne-Regular.ttf");
 
     commands.spawn_bundle(TextBundle {
         style: Style {
@@ -29,7 +33,7 @@ fn create_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
         text: Text::with_section(
             "Beeline",
             TextStyle {
-                font: font.clone(),
+                font: font.get_handle(),
                 font_size: 130.0,
                 ..TextStyle::default()
             },
@@ -47,19 +51,52 @@ fn create_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     bottom: Val::Percent(35.0),
                     ..Rect::default()
                 },
-                size: Size::new(Val::Px(150.0), Val::Px(65.0)),
+                size: Size::new(Val::Px(200.0), Val::Px(65.0)),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 ..Style::default()
             },
             ..ButtonBundle::default()
         })
+        .insert(ButtonType::Play)
         .with_children(|parent| {
             parent.spawn_bundle(TextBundle {
                 text: Text::with_section(
                     "Play",
                     TextStyle {
-                        font,
+                        font: font.get_handle(),
+                        font_size: 60.0,
+                        color: Color::BLACK,
+                    },
+                    TextAlignment::default(),
+                ),
+                ..TextBundle::default()
+            });
+        });
+
+    commands
+        .spawn_bundle(ButtonBundle {
+            style: Style {
+                position_type: PositionType::Absolute,
+                position: Rect {
+                    left: Val::Percent(10.0),
+                    bottom: Val::Percent(20.0),
+                    ..Rect::default()
+                },
+                size: Size::new(Val::Px(200.0), Val::Px(65.0)),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..Style::default()
+            },
+            ..ButtonBundle::default()
+        })
+        .insert(ButtonType::Upgrades)
+        .with_children(|parent| {
+            parent.spawn_bundle(TextBundle {
+                text: Text::with_section(
+                    "Upgrades",
+                    TextStyle {
+                        font: font.get_handle(),
                         font_size: 60.0,
                         color: Color::BLACK,
                     },
@@ -72,19 +109,17 @@ fn create_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn manage_menu_button(
     mut state: ResMut<State<AppState>>,
-    mut interaction: Query<(&Interaction, &mut UiColor), (Changed<Interaction>, With<Button>)>,
+    interaction: Query<(&Interaction, &ButtonType), (Changed<Interaction>, With<Button>)>,
 ) {
-    for (interaction, mut color) in interaction.iter_mut() {
-        *color = if matches!(interaction, Interaction::None) {
-            NORMAL_BUTTON_COLOR
-        } else {
-            ACTIVE_BUTTON_COLOR
-        }
-        .into();
-
-        // Check if the button has been clicked
-        if matches!(interaction, Interaction::Clicked) {
-            state.set(AppState::LevelSelect).unwrap();
+    for (interaction, button_type) in interaction.iter() {
+        match (interaction, button_type) {
+            (Interaction::Clicked, ButtonType::Play) => {
+                state.set(AppState::LevelSelect).unwrap();
+            }
+            (Interaction::Clicked, ButtonType::Upgrades) => {
+                state.set(AppState::UpgradeSelect).unwrap();
+            }
+            _ => {}
         }
     }
 }
