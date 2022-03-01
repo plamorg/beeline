@@ -1,6 +1,7 @@
 use crate::{
     camera::MainCamera,
     enemy::Enemy,
+    upgrades::Upgrades,
     util::{polar_to_cartesian, AnimatedSprite},
     AppState,
 };
@@ -36,10 +37,29 @@ pub fn spawn_player(
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
     mut textures: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
+    upgrades: Res<Upgrades>,
     start_location: Vec2,
 ) {
     // Define player size
     let size = Vec2::splat(Player::SIZE);
+
+    let transform = Transform {
+        translation: start_location.extend(1.0),
+        scale: if upgrades.has_upgrade(Upgrades::SHRINK) {
+            // Half player scale if shrink upgrade is active
+            Vec2::splat(0.5)
+        } else {
+            Vec2::ONE
+        }
+        .extend(1.0),
+        ..Transform::default()
+    };
+
+    let collision_shape = if upgrades.has_upgrade(Upgrades::SHRINK) {
+        CollisionShape::new_rectangle(size.x / 2.0, size.y / 2.0)
+    } else {
+        CollisionShape::new_rectangle(size.x, size.y)
+    };
 
     // Spawn player
     commands
@@ -50,17 +70,18 @@ pub fn spawn_player(
             "bee.png",
             6,
             size,
-            Transform::from_translation(start_location.extend(1.0)),
+            transform,
             Duration::from_millis(100),
             AnimationMode::Repeat,
         ))
-        .insert(CollisionShape::new_rectangle(size.x, size.y))
+        .insert(collision_shape)
         .insert(Player);
 }
 
 fn move_player(
     windows: Res<Windows>,
     time: Res<Time>,
+    upgrades: Res<Upgrades>,
     camera: Query<&Camera, With<MainCamera>>,
     mut transform: Query<&mut Transform, (With<Player>, Without<MainCamera>)>,
 ) {
@@ -78,7 +99,14 @@ fn move_player(
         let velocity_scale = relative_pos.length().min(magnitude_cap) / magnitude_cap;
 
         let velocity = polar_to_cartesian(velocity_angle, velocity_scale * Player::VELOCITY)
-            * time.delta_seconds();
+            * time.delta_seconds()
+            * if upgrades.has_upgrade(Upgrades::DOUBLE_SPEED) {
+                // Double velocity if player has double speed upgrade
+                2.0
+            } else {
+                1.0
+            };
+
         let mut transform = transform.single_mut();
         transform.translation.x += velocity.x;
         transform.translation.y += velocity.y;

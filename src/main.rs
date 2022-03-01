@@ -8,6 +8,7 @@ mod level_select;
 mod menu;
 mod player;
 mod pursue;
+mod upgrades;
 mod util;
 mod world;
 
@@ -21,6 +22,7 @@ use enemy::EnemyPlugin;
 use level_select::LevelSelectPlugin;
 use menu::MenuPlugin;
 use player::PlayerPlugin;
+use upgrades::UpgradesPlugin;
 use world::WorldPlugin;
 
 pub const NORMAL_BUTTON_COLOR: Color = Color::rgb(0.65, 0.8, 0.44);
@@ -54,6 +56,7 @@ fn main() {
         .add_plugin(LevelSelectPlugin)
         .add_plugin(MenuPlugin)
         .add_plugin(PlayerPlugin)
+        .add_plugin(UpgradesPlugin)
         .add_plugin(WorldPlugin)
         .add_plugin(DeathPlugin)
         .run();
