@@ -1,11 +1,12 @@
 use crate::{enemy::Enemy, player, util::AnimatedSprite, AppState};
-use benimator::SpriteSheetAnimation;
+use benimator::{AnimationMode, SpriteSheetAnimation};
 use bevy::prelude::*;
 use std::{
     f32::consts::PI,
     fs::File,
     io::{self, BufRead, BufReader},
     path::Path,
+    time::Duration,
 };
 
 enum WorldType {
@@ -151,6 +152,8 @@ fn spawn_world(
                                     rotation: Quat::from_rotation_z(angle - PI / 2.0),
                                     ..Transform::default()
                                 },
+                                Duration::from_millis(100),
+                                AnimationMode::Repeat,
                             ))
                             .insert(spawner.clone());
                     }

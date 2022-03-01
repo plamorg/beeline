@@ -1,10 +1,10 @@
 use crate::{
     player::Player, pursue::pursue, util::polar_to_cartesian, util::AnimatedSprite, AppState,
 };
-use benimator::SpriteSheetAnimation;
+use benimator::{AnimationMode, SpriteSheetAnimation};
 use bevy::prelude::*;
 use impacted::CollisionShape;
-use std::f32::consts::PI;
+use std::{f32::consts::PI, time::Duration};
 
 const LASER_SCALE_INTERPOLATION: f32 = 0.08;
 
@@ -80,6 +80,8 @@ impl Enemy {
                         8,
                         Self::MISSILE_SIZE.into(),
                         Transform::from_translation(spawn_position),
+                        Duration::from_millis(100),
+                        AnimationMode::Repeat,
                     ))
                     .insert(CollisionShape::new_rectangle(
                         Self::MISSILE_SIZE.0,
@@ -102,6 +104,8 @@ impl Enemy {
                             rotation: Quat::from_rotation_z(*angle - PI / 2.0),
                             scale: Vec3::ZERO,
                         },
+                        Duration::from_millis(100),
+                        AnimationMode::Repeat,
                     ))
                     .insert(CollisionShape::new_rectangle(
                         Self::LASER_SIZE.0,

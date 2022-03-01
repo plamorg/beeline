@@ -2,6 +2,7 @@
 
 mod camera;
 mod collision;
+mod death;
 mod enemy;
 mod level_select;
 mod menu;
@@ -15,6 +16,7 @@ use bevy::prelude::*;
 
 use camera::CameraPlugin;
 use collision::CollisionPlugin;
+use death::DeathPlugin;
 use enemy::EnemyPlugin;
 use level_select::LevelSelectPlugin;
 use menu::MenuPlugin;
@@ -29,9 +31,10 @@ pub enum AppState {
     Menu,
     LevelSelect,
     Game,
+    Death,
 }
 
-fn despawn_all(mut commands: Commands, entities: Query<Entity>) {
+pub fn despawn_all(mut commands: Commands, entities: Query<Entity>) {
     for entity in entities.iter() {
         commands.entity(entity).despawn_recursive();
     }
@@ -43,7 +46,7 @@ fn main() {
         .add_state(AppState::Menu)
         .add_system_set(SystemSet::on_exit(AppState::Menu).with_system(despawn_all))
         .add_system_set(SystemSet::on_exit(AppState::LevelSelect).with_system(despawn_all))
-        .add_system_set(SystemSet::on_exit(AppState::Game).with_system(despawn_all))
+        .add_system_set(SystemSet::on_exit(AppState::Death).with_system(despawn_all))
         .add_plugin(AnimationPlugin::default())
         .add_plugin(CameraPlugin)
         .add_plugin(CollisionPlugin)
@@ -52,5 +55,6 @@ fn main() {
         .add_plugin(MenuPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(WorldPlugin)
+        .add_plugin(DeathPlugin)
         .run();
 }
