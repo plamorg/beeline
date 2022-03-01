@@ -4,10 +4,10 @@ use crate::{
     util::{polar_to_cartesian, AnimatedSprite},
     AppState,
 };
-use benimator::SpriteSheetAnimation;
+use benimator::{AnimationMode, SpriteSheetAnimation};
 use bevy::prelude::*;
 use impacted::CollisionShape;
-use std::f32::consts::PI;
+use std::{f32::consts::PI, time::Duration};
 
 pub struct PlayerPlugin;
 
@@ -25,7 +25,7 @@ impl Plugin for PlayerPlugin {
 pub struct Player;
 
 impl Player {
-    const SIZE: f32 = 24.0;
+    pub const SIZE: f32 = 24.0;
     const VELOCITY: f32 = 500.0;
 }
 
@@ -51,6 +51,8 @@ pub fn spawn_player(
             6,
             size,
             Transform::from_translation(start_location.extend(1.0)),
+            Duration::from_millis(100),
+            AnimationMode::Repeat,
         ))
         .insert(CollisionShape::new_rectangle(size.x, size.y))
         .insert(Player);
@@ -86,6 +88,7 @@ fn move_player(
 }
 
 fn detect_collision(
+    mut state: ResMut<State<AppState>>,
     enemies: Query<&CollisionShape, (With<Enemy>, Changed<CollisionShape>)>,
     player: Query<&CollisionShape, (With<Player>, Changed<CollisionShape>)>,
 ) {
@@ -93,7 +96,8 @@ fn detect_collision(
         for enemy in enemies.iter() {
             if player.is_collided_with(enemy) {
                 println!("Player has collided with enemy");
-                // TODO: Implement logic for what happens upon collision
+                state.set(AppState::Death).unwrap();
+                return;
             }
         }
     }
