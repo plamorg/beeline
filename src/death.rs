@@ -1,10 +1,12 @@
-use std::time::Duration;
-
+use crate::{
+    player::Player,
+    util::{AnimatedSprite, AnimatedSpriteData},
+    AppState,
+};
 use benimator::{AnimationMode, Play, SpriteSheetAnimation};
 use bevy::prelude::*;
 use rand::random;
-
-use crate::{player::Player, util::AnimatedSprite, AppState};
+use std::time::Duration;
 
 pub struct DeathPlugin;
 
@@ -47,12 +49,14 @@ fn spawn_death_anim(
             &mut animations,
             &mut textures,
             &asset_server,
-            "bee-dead.png",
-            73,
-            Vec2::splat(Player::SIZE),
-            player_transform,
-            Duration::from_millis(35),
-            AnimationMode::Once,
+            AnimatedSpriteData {
+                path: "bee-dead.png".into(),
+                frames: 73,
+                size: Vec2::splat(Player::SIZE),
+                transform: player_transform,
+                delay: Duration::from_millis(35),
+                mode: AnimationMode::Once,
+            },
         ))
         .insert(Player)
         .insert(Play);
@@ -79,22 +83,26 @@ fn end_death_anim(
             for i in 0..DEATH_SHARDS {
                 // [0, 2pi)
                 let angle = random::<f32>() * 2. * std::f32::consts::PI;
+
+                let sprite_path = if i % 2 == 0 {
+                    "bee-shard-yellow.png"
+                } else {
+                    "bee-shard-brown.png"
+                }
+                .into();
                 commands
                     .spawn_bundle(AnimatedSprite::new(
                         &mut animations,
                         &mut textures,
                         &asset_server,
-                        if i % 2 == 0 {
-                            "bee-shard-yellow.png"
-                        } else {
-                            "bee-shard-brown.png"
+                        AnimatedSpriteData {
+                            path: sprite_path,
+                            frames: 11,
+                            size: Vec2::splat(DeathShard::SIZE),
+                            transform: Transform::from_translation(player_transform.translation),
+                            delay: Duration::from_millis(50),
+                            ..AnimatedSpriteData::default()
                         },
-                        11,
-                        Vec2::splat(DeathShard::SIZE),
-                        // reset rotation
-                        Transform::from_translation(player_transform.translation),
-                        Duration::from_millis(50),
-                        AnimationMode::Repeat,
                     ))
                     .insert(DeathShard {
                         sin_angle: angle.sin(),

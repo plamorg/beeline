@@ -1,10 +1,14 @@
 use crate::{
-    player::Player, pursue::pursue, util::polar_to_cartesian, util::AnimatedSprite, AppState,
+    player::Player,
+    pursue::pursue,
+    util::polar_to_cartesian,
+    util::{AnimatedSprite, AnimatedSpriteData},
+    AppState,
 };
-use benimator::{AnimationMode, SpriteSheetAnimation};
+use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
 use impacted::CollisionShape;
-use std::{f32::consts::PI, time::Duration};
+use std::f32::consts::PI;
 
 const LASER_SCALE_INTERPOLATION: f32 = 0.08;
 
@@ -76,12 +80,13 @@ impl Enemy {
                         animations,
                         textures,
                         asset_server,
-                        "rocket.png",
-                        8,
-                        Self::MISSILE_SIZE.into(),
-                        Transform::from_translation(spawn_position),
-                        Duration::from_millis(100),
-                        AnimationMode::Repeat,
+                        AnimatedSpriteData {
+                            path: "rocket.png".into(),
+                            frames: 8,
+                            size: Self::MISSILE_SIZE.into(),
+                            transform: Transform::from_translation(spawn_position),
+                            ..AnimatedSpriteData::default()
+                        },
                     ))
                     .insert(CollisionShape::new_rectangle(
                         Self::MISSILE_SIZE.0,
@@ -96,16 +101,18 @@ impl Enemy {
                         animations,
                         textures,
                         asset_server,
-                        "laser.png",
-                        4,
-                        Self::LASER_SIZE.into(),
-                        Transform {
-                            translation: spawn_position,
-                            rotation: Quat::from_rotation_z(*angle - PI / 2.0),
-                            scale: Vec3::ZERO,
+                        AnimatedSpriteData {
+                            path: "laser.png".into(),
+                            frames: 4,
+                            size: Self::LASER_SIZE.into(),
+                            transform: Transform {
+                                translation: spawn_position,
+                                rotation: Quat::from_rotation_z(*angle - PI / 2.0),
+                                // Spawn with zero scale
+                                scale: Vec3::ZERO,
+                            },
+                            ..AnimatedSpriteData::default()
                         },
-                        Duration::from_millis(100),
-                        AnimationMode::Repeat,
                     ))
                     .insert(CollisionShape::new_rectangle(
                         Self::LASER_SIZE.0,

@@ -1,12 +1,17 @@
-use crate::{enemy::Enemy, player, upgrades::Upgrades, util::AnimatedSprite, AppState};
-use benimator::{AnimationMode, SpriteSheetAnimation};
+use crate::{
+    enemy::Enemy,
+    player,
+    upgrades::Upgrades,
+    util::{AnimatedSprite, AnimatedSpriteData},
+    AppState,
+};
+use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
 use std::{
     f32::consts::PI,
     fs::File,
     io::{self, BufRead, BufReader},
     path::Path,
-    time::Duration,
 };
 
 enum WorldType {
@@ -145,16 +150,17 @@ fn spawn_world(
                                 &mut animations,
                                 &mut textures,
                                 &asset_server,
-                                "laser-spawner.png",
-                                2,
-                                tile_size,
-                                Transform {
-                                    translation: transform.translation,
-                                    rotation: Quat::from_rotation_z(angle - PI / 2.0),
-                                    ..Transform::default()
+                                AnimatedSpriteData {
+                                    path: "laser-spawner.png".into(),
+                                    frames: 2,
+                                    size: tile_size,
+                                    transform: Transform {
+                                        translation: transform.translation,
+                                        rotation: Quat::from_rotation_z(angle - PI / 2.0),
+                                        ..Transform::default()
+                                    },
+                                    ..AnimatedSpriteData::default()
                                 },
-                                Duration::from_millis(100),
-                                AnimationMode::Repeat,
                             ))
                             .insert(spawner.clone());
                     }

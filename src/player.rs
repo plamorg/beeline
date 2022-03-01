@@ -2,13 +2,13 @@ use crate::{
     camera::MainCamera,
     enemy::Enemy,
     upgrades::Upgrades,
-    util::{polar_to_cartesian, AnimatedSprite},
+    util::{polar_to_cartesian, AnimatedSprite, AnimatedSpriteData},
     AppState,
 };
-use benimator::{AnimationMode, SpriteSheetAnimation};
+use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
 use impacted::CollisionShape;
-use std::{f32::consts::PI, time::Duration};
+use std::f32::consts::PI;
 
 pub struct PlayerPlugin;
 
@@ -67,12 +67,13 @@ pub fn spawn_player(
             &mut animations,
             &mut textures,
             &asset_server,
-            "bee.png",
-            6,
-            size,
-            transform,
-            Duration::from_millis(100),
-            AnimationMode::Repeat,
+            AnimatedSpriteData {
+                path: "bee.png".into(),
+                frames: 6,
+                size,
+                transform,
+                ..AnimatedSpriteData::default()
+            },
         ))
         .insert(collision_shape)
         .insert(Player);
