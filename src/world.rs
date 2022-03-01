@@ -1,4 +1,4 @@
-use crate::{enemy::Enemy, player, util::AnimatedSprite, AppState};
+use crate::{enemy::Enemy, player, upgrades::Upgrades, util::AnimatedSprite, AppState};
 use benimator::{AnimationMode, SpriteSheetAnimation};
 use bevy::prelude::*;
 use std::{
@@ -104,6 +104,7 @@ fn spawn_world(
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
     mut textures: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
+    upgrades: Res<Upgrades>,
 ) {
     let tile_size = Vec2::splat(Tile::SIZE);
 
@@ -175,6 +176,7 @@ fn spawn_world(
         animations,
         textures,
         asset_server,
+        upgrades,
         player_start_location,
     );
 }

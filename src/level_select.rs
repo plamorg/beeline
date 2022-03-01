@@ -1,4 +1,8 @@
-use crate::{world::World, AppState, ACTIVE_BUTTON_COLOR, NORMAL_BUTTON_COLOR};
+use crate::{
+    ui::{spawn_back_button, GameFont},
+    world::World,
+    AppState,
+};
 use bevy::prelude::*;
 use std::{ffi::OsStr, fs, io, path::PathBuf};
 
@@ -47,10 +51,10 @@ fn fetch_level_paths() -> io::Result<Vec<PathBuf>> {
     Ok(paths)
 }
 
-fn create_level_select(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn create_level_select(mut commands: Commands, font: Res<GameFont>) {
     commands.spawn_bundle(UiCameraBundle::default());
 
-    let font = asset_server.load("FrancoisOne-Regular.ttf");
+    spawn_back_button(&mut commands, font.get_handle());
 
     commands
         .spawn_bundle(NodeBundle {
@@ -74,7 +78,7 @@ fn create_level_select(mut commands: Commands, asset_server: Res<AssetServer>) {
                 text: Text::with_section(
                     "Level Select",
                     TextStyle {
-                        font: font.clone(),
+                        font: font.get_handle(),
                         font_size: 70.0,
                         ..TextStyle::default()
                     },
@@ -116,7 +120,6 @@ fn create_level_select(mut commands: Commands, asset_server: Res<AssetServer>) {
                                             align_items: AlignItems::Center,
                                             ..Style::default()
                                         },
-                                        color: NORMAL_BUTTON_COLOR.into(),
                                         ..ButtonBundle::default()
                                     })
                                     .insert(LevelSelectButton {
@@ -128,9 +131,9 @@ fn create_level_select(mut commands: Commands, asset_server: Res<AssetServer>) {
                                             text: Text::with_section(
                                                 name,
                                                 TextStyle {
-                                                    font: font.clone(),
+                                                    font: font.get_handle(),
                                                     font_size: 30.0,
-                                                    ..TextStyle::default()
+                                                    color: Color::BLACK,
                                                 },
                                                 TextAlignment::default(),
                                             ),
@@ -147,19 +150,9 @@ fn create_level_select(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn manage_level_select_buttons(
     mut commands: Commands,
     mut state: ResMut<State<AppState>>,
-    mut interaction: Query<
-        (&Interaction, &mut UiColor, &LevelSelectButton),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction: Query<(&Interaction, &LevelSelectButton), (Changed<Interaction>, With<Button>)>,
 ) {
-    for (interaction, mut color, level_select_button) in interaction.iter_mut() {
-        *color = if matches!(interaction, Interaction::None) {
-            NORMAL_BUTTON_COLOR
-        } else {
-            ACTIVE_BUTTON_COLOR
-        }
-        .into();
-
+    for (interaction, level_select_button) in interaction.iter() {
         // Check if the button has been clicked
         if matches!(interaction, Interaction::Clicked) {
             commands.insert_resource(

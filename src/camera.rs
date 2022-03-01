@@ -1,4 +1,4 @@
-use crate::{player::Player, AppState};
+use crate::{player::Player, upgrades::Upgrades, AppState};
 use bevy::prelude::*;
 
 pub struct CameraPlugin;
@@ -13,6 +13,10 @@ impl Plugin for CameraPlugin {
 #[derive(Component)]
 pub struct MainCamera;
 
+impl MainCamera {
+    const INTERPOLATION: f32 = 0.1;
+}
+
 fn spawn_camera(mut commands: Commands) {
     let mut orthographic_camera_bundle = OrthographicCameraBundle::new_2d();
     orthographic_camera_bundle.orthographic_projection.scale = 0.5;
@@ -25,13 +29,22 @@ fn spawn_camera(mut commands: Commands) {
 fn follow_player(
     mut camera_transform: Query<&mut Transform, With<MainCamera>>,
     player_transform: Query<&Transform, (With<Player>, Without<MainCamera>)>,
+    upgrades: Res<Upgrades>,
 ) {
     let mut camera_transform = camera_transform.single_mut();
     let player_transform = player_transform.single();
 
+    let interpolation = MainCamera::INTERPOLATION
+        // Double interpolation if double speed is active
+        * if upgrades.has_upgrade(Upgrades::DOUBLE_SPEED) {
+            2.0
+        } else {
+            1.0
+        };
+
     camera_transform.translation = camera_transform
         .translation
         .truncate()
-        .lerp(player_transform.translation.truncate(), 0.1)
+        .lerp(player_transform.translation.truncate(), interpolation)
         .extend(camera_transform.translation.z);
 }
