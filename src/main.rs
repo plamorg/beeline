@@ -22,7 +22,7 @@ use collision::CollisionPlugin;
 use death::DeathPlugin;
 use enemy::EnemyPlugin;
 use player::PlayerPlugin;
-use ui::UIPlugins;
+use ui::UiPlugins;
 use upgrades::UpgradesPlugin;
 use world::WorldPlugin;
 
@@ -54,7 +54,7 @@ fn main() {
         .add_plugin(CollisionPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(PlayerPlugin)
-        .add_plugins(UIPlugins)
+        .add_plugins(UiPlugins)
         .add_plugin(UpgradesPlugin)
         .add_plugin(WorldPlugin)
         .add_plugin(DeathPlugin)

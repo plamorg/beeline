@@ -10,7 +10,7 @@ pub const NORMAL_BUTTON_COLOR: Color = Color::rgb(0.65, 0.8, 0.44);
 pub const ACTIVE_BUTTON_COLOR: Color = Color::rgb(0.98, 0.82, 0.48);
 pub const INACTIVE_BUTTON_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 
-struct UIPlugin;
+struct UiPlugin;
 
 #[derive(Clone)]
 pub struct GameFont(Handle<Font>);
@@ -28,7 +28,7 @@ impl FromWorld for GameFont {
     }
 }
 
-impl Plugin for UIPlugin {
+impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<GameFont>()
             .add_system_set(SystemSet::on_update(AppState::Menu).with_system(manage_button_colors))
@@ -45,15 +45,15 @@ impl Plugin for UIPlugin {
     }
 }
 
-pub struct UIPlugins;
+pub struct UiPlugins;
 
-impl PluginGroup for UIPlugins {
+impl PluginGroup for UiPlugins {
     fn build(&mut self, group: &mut PluginGroupBuilder) {
         group
             .add(LevelSelectPlugin)
             .add(MenuPlugin)
             .add(UpgradeSelectPlugin)
-            .add(UIPlugin);
+            .add(UiPlugin);
     }
 }
 
