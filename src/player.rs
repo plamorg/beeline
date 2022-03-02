@@ -17,7 +17,8 @@ impl Plugin for PlayerPlugin {
         app.add_system_set(
             SystemSet::on_update(AppState::Game)
                 .with_system(move_player)
-                .with_system(detect_collision),
+                .with_system(detect_collision)
+                .with_system(teleport),
         );
     }
 }
@@ -128,6 +129,36 @@ fn detect_collision(
                 state.set(AppState::Death).unwrap();
                 return;
             }
+        }
+    }
+}
+
+fn teleport(
+    windows: Res<Windows>,
+    camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    keyboard_input: Res<Input<KeyCode>>,
+    button_input: Res<Input<MouseButton>>,
+    upgrades: Res<Upgrades>,
+    mut player: Query<&mut Transform, With<Player>>,
+) {
+    if upgrades.has_upgrade(Upgrades::TELEPORT)
+        && (keyboard_input.just_pressed(KeyCode::Space)
+            || button_input.just_pressed(MouseButton::Left))
+    {
+        let (camera, camera_transform) = camera.single();
+        let window = windows.get(camera.window).unwrap();
+
+        if let Some(cursor_pos) = window.cursor_position() {
+            // Calculate the cursor's world position
+            let window_size = Vec2::new(window.width() as f32, window.height() as f32);
+            let ndc = (cursor_pos / window_size) * 2.0 - Vec2::ONE;
+            let ndc_to_world =
+                camera_transform.compute_matrix() * camera.projection_matrix.inverse();
+            let world_pos = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
+
+            // Set player translation to the cursor's world position
+            let mut player_transform = player.single_mut();
+            player_transform.translation = world_pos.extend(player_transform.translation.z);
         }
     }
 }

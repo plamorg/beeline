@@ -25,8 +25,8 @@ macro_rules! upgrade_definitions {
 }
 
 impl Upgrades {
-    upgrade_definitions!(DOUBLE_SPEED, SHRINK);
-    const UPGRADE_NAMES: &'static [&'static str] = &["Double Speed", "Shrink"];
+    upgrade_definitions!(DOUBLE_SPEED, SHRINK, TELEPORT);
+    const UPGRADE_NAMES: &'static [&'static str] = &["Double Speed", "Shrink", "Teleport"];
 
     pub fn set_upgrade(&mut self, upgrade: u64) {
         self.0 |= upgrade;
