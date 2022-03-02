@@ -1,6 +1,7 @@
 use crate::{
     player::Player,
     pursue::pursue,
+    upgrades::{Upgrade, UpgradeTracker},
     util::polar_to_cartesian,
     util::{AnimatedSprite, AnimatedSpriteData},
     AppState,
@@ -129,6 +130,7 @@ fn follow_player(
     time: Res<Time>,
     player_transform: Query<&Transform, (With<Player>, Without<Enemy>)>,
     mut enemies: Query<(&mut Transform, &Pursuer), With<Enemy>>,
+    upgrades: Res<UpgradeTracker>,
 ) {
     for (mut transform, follow) in enemies.iter_mut() {
         let player_transform = player_transform.single();
@@ -136,7 +138,12 @@ fn follow_player(
             transform.translation.truncate(),
             player_transform.translation.truncate(),
             follow.velocity,
-        ) * time.delta_seconds();
+        ) * time.delta_seconds()
+            * if upgrades.has_upgrade(Upgrade::SlowEnemies) {
+                0.5
+            } else {
+                1.0
+            };
         transform.translation.x += velocity.x;
         transform.translation.y += velocity.y;
 
@@ -148,11 +155,18 @@ fn follow_player(
 fn move_bullet_enemies(
     time: Res<Time>,
     mut enemies: Query<(&mut Transform, &Bullet), With<Enemy>>,
+    upgrades: Res<UpgradeTracker>,
 ) {
     for (mut transform, bullet) in enemies.iter_mut() {
-        transform.translation +=
-            (polar_to_cartesian(bullet.angle, 1.0) * bullet.velocity * time.delta_seconds())
-                .extend(0.0);
+        transform.translation += (polar_to_cartesian(bullet.angle, 1.0)
+            * bullet.velocity
+            * time.delta_seconds()
+            * if upgrades.has_upgrade(Upgrade::SlowEnemies) {
+                0.5
+            } else {
+                1.0
+            })
+        .extend(0.0);
         transform.scale = transform.scale.lerp(Vec3::ONE, LASER_SCALE_INTERPOLATION);
     }
 }

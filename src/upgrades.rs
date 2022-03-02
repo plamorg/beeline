@@ -112,6 +112,7 @@ pub enum Upgrade {
     DoubleSpeed,
     Shrink,
     Teleport,
+    SlowEnemies,
 }
 
 pub enum UpgradeSlot {
