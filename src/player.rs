@@ -1,7 +1,7 @@
 use crate::{
     camera::MainCamera,
     enemy::Enemy,
-    upgrades::Upgrades,
+    upgrades::{Upgrade, UpgradeTracker},
     util::{polar_to_cartesian, AnimatedSprite, AnimatedSpriteData},
     AppState,
 };
@@ -38,7 +38,7 @@ pub fn spawn_player(
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
     mut textures: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
-    upgrades: Res<Upgrades>,
+    upgrades: Res<UpgradeTracker>,
     start_location: Vec2,
 ) {
     // Define player size
@@ -46,7 +46,7 @@ pub fn spawn_player(
 
     let transform = Transform {
         translation: start_location.extend(1.0),
-        scale: if upgrades.has_upgrade(Upgrades::SHRINK) {
+        scale: if upgrades.has_upgrade(Upgrade::Shrink) {
             // Half player scale if shrink upgrade is active
             Vec2::splat(0.5)
         } else {
@@ -56,7 +56,7 @@ pub fn spawn_player(
         ..Transform::default()
     };
 
-    let collision_shape = if upgrades.has_upgrade(Upgrades::SHRINK) {
+    let collision_shape = if upgrades.has_upgrade(Upgrade::Shrink) {
         CollisionShape::new_rectangle(size.x / 2.0, size.y / 2.0)
     } else {
         CollisionShape::new_rectangle(size.x, size.y)
@@ -83,7 +83,7 @@ pub fn spawn_player(
 fn move_player(
     windows: Res<Windows>,
     time: Res<Time>,
-    upgrades: Res<Upgrades>,
+    upgrades: Res<UpgradeTracker>,
     camera: Query<&Camera, With<MainCamera>>,
     mut transform: Query<&mut Transform, (With<Player>, Without<MainCamera>)>,
 ) {
@@ -102,7 +102,7 @@ fn move_player(
 
         let velocity = polar_to_cartesian(velocity_angle, velocity_scale * Player::VELOCITY)
             * time.delta_seconds()
-            * if upgrades.has_upgrade(Upgrades::DOUBLE_SPEED) {
+            * if upgrades.has_upgrade(Upgrade::DoubleSpeed) {
                 // Double velocity if player has double speed upgrade
                 2.0
             } else {
@@ -136,15 +136,11 @@ fn detect_collision(
 fn teleport(
     windows: Res<Windows>,
     camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    keyboard_input: Res<Input<KeyCode>>,
     button_input: Res<Input<MouseButton>>,
-    upgrades: Res<Upgrades>,
+    upgrades: Res<UpgradeTracker>,
     mut player: Query<&mut Transform, With<Player>>,
 ) {
-    if upgrades.has_upgrade(Upgrades::TELEPORT)
-        && (keyboard_input.just_pressed(KeyCode::Space)
-            || button_input.just_pressed(MouseButton::Left))
-    {
+    if upgrades.was_upgrade_activated(button_input, Upgrade::Teleport) {
         let (camera, camera_transform) = camera.single();
         let window = windows.get(camera.window).unwrap();
 
