@@ -1,7 +1,7 @@
 use crate::{
     enemy::Enemy,
     player,
-    upgrades::Upgrades,
+    upgrades::UpgradeTracker,
     util::{AnimatedSprite, AnimatedSpriteData},
     AppState,
 };
@@ -109,7 +109,7 @@ fn spawn_world(
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
     mut textures: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
-    upgrades: Res<Upgrades>,
+    upgrades: Res<UpgradeTracker>,
 ) {
     let tile_size = Vec2::splat(Tile::SIZE);
 

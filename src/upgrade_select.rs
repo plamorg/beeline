@@ -3,10 +3,11 @@ use crate::{
         spawn_back_button, GameFont, ACTIVE_BUTTON_COLOR, INACTIVE_BUTTON_COLOR,
         NORMAL_BUTTON_COLOR,
     },
-    upgrades::Upgrades,
+    upgrades::{create_upgrades_overlay, Upgrade, UpgradeTracker},
     AppState,
 };
 use bevy::prelude::*;
+use strum::IntoEnumIterator;
 
 pub struct UpgradeSelectPlugin;
 
@@ -22,12 +23,13 @@ impl Plugin for UpgradeSelectPlugin {
 }
 
 #[derive(Component)]
-pub struct UpgradeButton(u64);
+pub struct UpgradeButton(Upgrade);
 
 fn create_upgrade_select(mut commands: Commands, font: Res<GameFont>) {
     commands.spawn_bundle(UiCameraBundle::default());
 
     spawn_back_button(&mut commands, font.get_handle());
+    create_upgrades_overlay(&mut commands, &font);
 
     commands
         .spawn_bundle(NodeBundle {
@@ -73,7 +75,8 @@ fn create_upgrade_select(mut commands: Commands, font: Res<GameFont>) {
                     ..NodeBundle::default()
                 })
                 .with_children(|parent| {
-                    for i in (0..Upgrades::number_of_upgrades()).step_by(3) {
+                    let upgrades: Vec<Upgrade> = Upgrade::iter().collect();
+                    for i in (0..upgrades.len()).step_by(3) {
                         parent
                             .spawn_bundle(NodeBundle {
                                 style: Style {
@@ -90,10 +93,8 @@ fn create_upgrade_select(mut commands: Commands, font: Res<GameFont>) {
                             })
                             .with_children(|parent| {
                                 for j in 0..3 {
-                                    if i + j < Upgrades::number_of_upgrades() {
-                                        let upgrade = 1 << (i + j);
-
-                                        let upgrade_name = Upgrades::get_name(upgrade);
+                                    if i + j < upgrades.len() {
+                                        let upgrade = upgrades[i + j];
 
                                         parent
                                             .spawn_bundle(ButtonBundle {
@@ -113,7 +114,7 @@ fn create_upgrade_select(mut commands: Commands, font: Res<GameFont>) {
                                             .with_children(|parent| {
                                                 parent.spawn_bundle(TextBundle {
                                                     text: Text::with_section(
-                                                        upgrade_name,
+                                                        upgrade.to_string(),
                                                         TextStyle {
                                                             font: font.get_handle(),
                                                             font_size: 30.0,
@@ -135,7 +136,7 @@ fn create_upgrade_select(mut commands: Commands, font: Res<GameFont>) {
 }
 
 fn manage_upgrade_buttons(
-    mut upgrades: ResMut<Upgrades>,
+    mut upgrades: ResMut<UpgradeTracker>,
     mut interaction: Query<
         (&Interaction, &mut UiColor, &UpgradeButton),
         (Changed<Interaction>, With<Button>),

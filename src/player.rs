@@ -1,7 +1,7 @@
 use crate::{
     camera::MainCamera,
     enemy::Enemy,
-    upgrades::Upgrades,
+    upgrades::{Upgrade, UpgradeTracker},
     util::{polar_to_cartesian, AnimatedSprite, AnimatedSpriteData},
     AppState,
 };
@@ -17,7 +17,8 @@ impl Plugin for PlayerPlugin {
         app.add_system_set(
             SystemSet::on_update(AppState::Game)
                 .with_system(move_player)
-                .with_system(detect_collision),
+                .with_system(detect_collision)
+                .with_system(teleport),
         );
     }
 }
@@ -37,7 +38,7 @@ pub fn spawn_player(
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
     mut textures: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
-    upgrades: Res<Upgrades>,
+    upgrades: Res<UpgradeTracker>,
     start_location: Vec2,
 ) {
     // Define player size
@@ -45,7 +46,7 @@ pub fn spawn_player(
 
     let transform = Transform {
         translation: start_location.extend(1.0),
-        scale: if upgrades.has_upgrade(Upgrades::SHRINK) {
+        scale: if upgrades.has_upgrade(Upgrade::Shrink) {
             // Half player scale if shrink upgrade is active
             Vec2::splat(0.5)
         } else {
@@ -55,7 +56,7 @@ pub fn spawn_player(
         ..Transform::default()
     };
 
-    let collision_shape = if upgrades.has_upgrade(Upgrades::SHRINK) {
+    let collision_shape = if upgrades.has_upgrade(Upgrade::Shrink) {
         CollisionShape::new_rectangle(size.x / 2.0, size.y / 2.0)
     } else {
         CollisionShape::new_rectangle(size.x, size.y)
@@ -82,7 +83,7 @@ pub fn spawn_player(
 fn move_player(
     windows: Res<Windows>,
     time: Res<Time>,
-    upgrades: Res<Upgrades>,
+    upgrades: Res<UpgradeTracker>,
     camera: Query<&Camera, With<MainCamera>>,
     mut transform: Query<&mut Transform, (With<Player>, Without<MainCamera>)>,
 ) {
@@ -101,7 +102,7 @@ fn move_player(
 
         let velocity = polar_to_cartesian(velocity_angle, velocity_scale * Player::VELOCITY)
             * time.delta_seconds()
-            * if upgrades.has_upgrade(Upgrades::DOUBLE_SPEED) {
+            * if upgrades.has_upgrade(Upgrade::DoubleSpeed) {
                 // Double velocity if player has double speed upgrade
                 2.0
             } else {
@@ -128,6 +129,32 @@ fn detect_collision(
                 state.set(AppState::Death).unwrap();
                 return;
             }
+        }
+    }
+}
+
+fn teleport(
+    windows: Res<Windows>,
+    camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    button_input: Res<Input<MouseButton>>,
+    upgrades: Res<UpgradeTracker>,
+    mut player: Query<&mut Transform, With<Player>>,
+) {
+    if upgrades.was_upgrade_activated(button_input, Upgrade::Teleport) {
+        let (camera, camera_transform) = camera.single();
+        let window = windows.get(camera.window).unwrap();
+
+        if let Some(cursor_pos) = window.cursor_position() {
+            // Calculate the cursor's world position
+            let window_size = Vec2::new(window.width() as f32, window.height() as f32);
+            let ndc = (cursor_pos / window_size) * 2.0 - Vec2::ONE;
+            let ndc_to_world =
+                camera_transform.compute_matrix() * camera.projection_matrix.inverse();
+            let world_pos = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
+
+            // Set player translation to the cursor's world position
+            let mut player_transform = player.single_mut();
+            player_transform.translation = world_pos.extend(player_transform.translation.z);
         }
     }
 }
