@@ -122,8 +122,8 @@ pub enum UpgradeSlot {
 
 #[derive(Debug, Default)]
 pub struct UpgradeTracker {
-    primary: Option<Upgrade>,
-    secondary: Option<Upgrade>,
+    pub primary: Option<Upgrade>,
+    pub secondary: Option<Upgrade>,
 }
 
 impl UpgradeTracker {

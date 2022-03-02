@@ -17,13 +17,19 @@ impl Plugin for UpgradeSelectPlugin {
             SystemSet::on_enter(AppState::UpgradeSelect).with_system(create_upgrade_select),
         )
         .add_system_set(
-            SystemSet::on_update(AppState::UpgradeSelect).with_system(manage_upgrade_buttons),
+            SystemSet::on_update(AppState::UpgradeSelect)
+                .with_system(manage_upgrade_buttons)
+                .with_system(update_upgrades_selected_indicator),
         );
     }
 }
 
 #[derive(Component)]
 pub struct UpgradeButton(Upgrade);
+
+// Component to display how many upgrades are currently selected
+#[derive(Component)]
+struct UpgradesSelectedIndicator;
 
 fn create_upgrade_select(mut commands: Commands, font: Res<GameFont>) {
     commands.spawn_bundle(UiCameraBundle::default());
@@ -48,6 +54,10 @@ fn create_upgrade_select(mut commands: Commands, font: Res<GameFont>) {
             parent.spawn_bundle(TextBundle {
                 style: Style {
                     position_type: PositionType::Absolute,
+                    position: Rect {
+                        top: Val::Percent(2.0),
+                        ..Rect::default()
+                    },
                     ..Style::default()
                 },
                 text: Text::with_section(
@@ -61,6 +71,30 @@ fn create_upgrade_select(mut commands: Commands, font: Res<GameFont>) {
                 ),
                 ..TextBundle::default()
             });
+
+            parent
+                .spawn_bundle(TextBundle {
+                    style: Style {
+                        position_type: PositionType::Absolute,
+                        position: Rect {
+                            bottom: Val::Percent(2.0),
+                            right: Val::Percent(2.0),
+                            ..Rect::default()
+                        },
+                        ..Style::default()
+                    },
+                    text: Text::with_section(
+                        "",
+                        TextStyle {
+                            font: font.get_handle(),
+                            font_size: 50.0,
+                            ..TextStyle::default()
+                        },
+                        TextAlignment::default(),
+                    ),
+                    ..TextBundle::default()
+                })
+                .insert(UpgradesSelectedIndicator);
 
             // Spawn level selector
             parent
@@ -162,4 +196,18 @@ fn manage_upgrade_buttons(
             }
         }
     }
+}
+
+fn update_upgrades_selected_indicator(
+    upgrades: Res<UpgradeTracker>,
+    mut indicator: Query<&mut Text, With<UpgradesSelectedIndicator>>,
+) {
+    let number = match (upgrades.primary, upgrades.secondary) {
+        (None, None) => "0",
+        (Some(_), Some(_)) => "2",
+        _ => "1",
+    };
+
+    let mut indicator = indicator.single_mut();
+    indicator.sections[0].value = format!("{number}/2 upgrades selected");
 }

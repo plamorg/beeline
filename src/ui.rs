@@ -1,4 +1,5 @@
 use crate::{
+    help::HelpPlugin,
     level_select::LevelSelectPlugin,
     menu::MenuPlugin,
     upgrade_select::{UpgradeButton, UpgradeSelectPlugin},
@@ -41,6 +42,11 @@ impl Plugin for UiPlugin {
                 SystemSet::on_update(AppState::LevelSelect)
                     .with_system(manage_button_colors)
                     .with_system(manage_back_button),
+            )
+            .add_system_set(
+                SystemSet::on_update(AppState::Help)
+                    .with_system(manage_button_colors)
+                    .with_system(manage_back_button),
             );
     }
 }
@@ -53,6 +59,7 @@ impl PluginGroup for UiPlugins {
             .add(LevelSelectPlugin)
             .add(MenuPlugin)
             .add(UpgradeSelectPlugin)
+            .add(HelpPlugin)
             .add(UiPlugin);
     }
 }

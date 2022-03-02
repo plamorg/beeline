@@ -4,6 +4,7 @@ mod camera;
 mod collision;
 mod death;
 mod enemy;
+mod help;
 mod level_select;
 mod menu;
 mod player;
@@ -31,6 +32,7 @@ pub enum AppState {
     Menu,
     UpgradeSelect,
     LevelSelect,
+    Help,
     Game,
     Death,
 }
@@ -46,8 +48,9 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_state(AppState::Menu)
         .add_system_set(SystemSet::on_exit(AppState::Menu).with_system(despawn_all))
-        .add_system_set(SystemSet::on_exit(AppState::LevelSelect).with_system(despawn_all))
         .add_system_set(SystemSet::on_exit(AppState::UpgradeSelect).with_system(despawn_all))
+        .add_system_set(SystemSet::on_exit(AppState::LevelSelect).with_system(despawn_all))
+        .add_system_set(SystemSet::on_exit(AppState::Help).with_system(despawn_all))
         .add_system_set(SystemSet::on_exit(AppState::Death).with_system(despawn_all))
         .add_plugin(AnimationPlugin::default())
         .add_plugin(CameraPlugin)
