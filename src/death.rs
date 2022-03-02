@@ -6,7 +6,7 @@ use crate::{
 use benimator::{AnimationMode, Play, SpriteSheetAnimation};
 use bevy::prelude::*;
 use rand::random;
-use std::time::Duration;
+use std::{f32::consts::PI, time::Duration};
 
 pub struct DeathPlugin;
 
@@ -16,7 +16,8 @@ impl Plugin for DeathPlugin {
             .add_system_set(
                 SystemSet::on_update(AppState::Death)
                     .with_system(end_death_anim)
-                    .with_system(update_flakes),
+                    .with_system(update_flakes)
+                    .with_system(update_death_timer),
             );
     }
 }
@@ -31,6 +32,9 @@ impl DeathShard {
     const SIZE: f32 = 24.0;
 }
 
+#[derive(Component)]
+struct DeathTimer;
+
 fn spawn_death_anim(
     mut commands: Commands,
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
@@ -38,11 +42,12 @@ fn spawn_death_anim(
     asset_server: Res<AssetServer>,
     mut textures: ResMut<Assets<TextureAtlas>>,
 ) {
+    commands.spawn_bundle((Timer::from_seconds(3.5, false), DeathTimer));
+
     let (player_entity, player_transform) = player_info.single();
     let player_transform = *player_transform;
 
     commands.entity(player_entity).despawn_recursive();
-    println!("killed player for death scene");
 
     commands
         .spawn_bundle(AnimatedSprite::new(
@@ -60,7 +65,6 @@ fn spawn_death_anim(
         ))
         .insert(Player)
         .insert(Play);
-    println!("spawned fake player");
 }
 
 const SHARD_SPEED: f32 = 7.;
@@ -82,7 +86,7 @@ fn end_death_anim(
             const DEATH_SHARDS: usize = 6;
             for i in 0..DEATH_SHARDS {
                 // [0, 2pi)
-                let angle = random::<f32>() * 2. * std::f32::consts::PI;
+                let angle = random::<f32>() * 2. * PI;
 
                 let sprite_path = if i % 2 == 0 {
                     "bee-shard-yellow.png"
@@ -118,5 +122,16 @@ fn update_flakes(mut transform: Query<(&DeathShard, &mut Transform)>) {
         let translation = &mut transform.translation;
         translation.y += shard.sin_angle * SHARD_SPEED;
         translation.x += shard.cos_angle * SHARD_SPEED;
+    }
+}
+
+fn update_death_timer(
+    mut state: ResMut<State<AppState>>,
+    time: Res<Time>,
+    mut timer: Query<&mut Timer, With<DeathTimer>>,
+) {
+    let mut timer = timer.single_mut();
+    if timer.tick(time.delta()).just_finished() {
+        state.set(AppState::Retry).unwrap();
     }
 }

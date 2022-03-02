@@ -9,6 +9,7 @@ mod level_select;
 mod menu;
 mod player;
 mod pursue;
+mod retry;
 mod ui;
 mod upgrade_select;
 mod upgrades;
@@ -35,6 +36,7 @@ pub enum AppState {
     Help,
     Game,
     Death,
+    Retry,
 }
 
 pub fn despawn_all(mut commands: Commands, entities: Query<Entity>) {
@@ -51,7 +53,7 @@ fn main() {
         .add_system_set(SystemSet::on_exit(AppState::UpgradeSelect).with_system(despawn_all))
         .add_system_set(SystemSet::on_exit(AppState::LevelSelect).with_system(despawn_all))
         .add_system_set(SystemSet::on_exit(AppState::Help).with_system(despawn_all))
-        .add_system_set(SystemSet::on_exit(AppState::Death).with_system(despawn_all))
+        .add_system_set(SystemSet::on_exit(AppState::Retry).with_system(despawn_all))
         .add_plugin(AnimationPlugin::default())
         .add_plugin(CameraPlugin)
         .add_plugin(CollisionPlugin)
