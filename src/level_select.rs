@@ -73,6 +73,10 @@ fn create_level_select(mut commands: Commands, font: Res<GameFont>) {
             parent.spawn_bundle(TextBundle {
                 style: Style {
                     position_type: PositionType::Absolute,
+                    position: Rect {
+                        top: Val::Percent(2.0),
+                        ..Rect::default()
+                    },
                     ..Style::default()
                 },
                 text: Text::with_section(
