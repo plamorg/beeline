@@ -1,4 +1,10 @@
-use crate::{ui::GameFont, AppState};
+use crate::{
+    player::Player,
+    ui::GameFont,
+    util::{AnimatedSprite, AnimatedSpriteData},
+    AppState,
+};
+use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
 
 pub struct MenuPlugin;
@@ -16,7 +22,29 @@ enum ButtonType {
     Upgrades,
 }
 
-fn create_menu(mut commands: Commands, font: Res<GameFont>) {
+fn create_menu(
+    mut commands: Commands,
+    font: Res<GameFont>,
+    mut animations: ResMut<Assets<SpriteSheetAnimation>>,
+    mut textures: ResMut<Assets<TextureAtlas>>,
+    asset_server: Res<AssetServer>,
+) {
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+
+    // Spawn player sprite
+    commands.spawn_bundle(AnimatedSprite::new(
+        &mut animations,
+        &mut textures,
+        &asset_server,
+        AnimatedSpriteData {
+            path: "bee.png".into(),
+            frames: 6,
+            size: Vec2::splat(Player::SIZE),
+            transform: Transform::from_scale(Vec3::new(3.0, 3.0, 0.0)),
+            ..AnimatedSpriteData::default()
+        },
+    ));
+
     commands.spawn_bundle(UiCameraBundle::default());
     commands.insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.4)));
 
