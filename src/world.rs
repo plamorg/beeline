@@ -1,5 +1,5 @@
 use crate::{
-    enemy::Enemy,
+    enemy::{Enemy, Projectile},
     player,
     upgrades::UpgradeTracker,
     util::{AnimatedSprite, AnimatedSpriteData},
@@ -7,6 +7,7 @@ use crate::{
 };
 use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
+use impacted::CollisionShape;
 use std::{
     f32::consts::PI,
     fs::File,
@@ -21,19 +22,19 @@ pub enum WorldType {
 
 #[derive(Component, Clone, Debug)]
 struct Spawner {
-    enemy: Enemy,
+    projectile: Projectile,
     timer: Timer,
 }
 
 impl Spawner {
-    // Create spawner given an enemy
-    fn new(enemy: Enemy) -> Self {
-        let cooldown = match enemy {
-            Enemy::Missile => Enemy::MISSILE_COOLDOWN,
-            Enemy::Laser { .. } => Enemy::LASER_COOLDOWN,
+    // Create spawner given a projectile enemy
+    fn new(projectile: Projectile) -> Self {
+        let cooldown = match projectile {
+            Projectile::Missile => Projectile::MISSILE_COOLDOWN,
+            Projectile::Laser { .. } => Projectile::LASER_COOLDOWN,
         };
         Self {
-            enemy,
+            projectile,
             timer: Timer::from_seconds(cooldown, true),
         }
     }
@@ -43,6 +44,7 @@ impl Spawner {
 enum Tile {
     Wall,
     Spawner(Spawner),
+    Trap,
 }
 
 impl Tile {
@@ -70,10 +72,11 @@ impl GameWorld {
                 let tile = match value.chars().next().unwrap() {
                     '.' => None,
                     '#' => Some(Tile::Wall),
-                    'L' => Some(Tile::Spawner(Spawner::new(Enemy::Laser {
+                    'L' => Some(Tile::Spawner(Spawner::new(Projectile::Laser {
                         angle: (&value[2..]).parse::<f32>().unwrap(),
                     }))),
-                    'M' => Some(Tile::Spawner(Spawner::new(Enemy::Missile))),
+                    'M' => Some(Tile::Spawner(Spawner::new(Projectile::Missile))),
+                    'T' => Some(Tile::Trap),
                     '*' => {
                         // The * character indicates player's spawn location
                         start = Some((j, i));
@@ -133,8 +136,8 @@ fn spawn_world(
                         ..SpriteBundle::default()
                     });
                 }
-                Some(Tile::Spawner(spawner)) => match spawner.enemy {
-                    Enemy::Missile => {
+                Some(Tile::Spawner(spawner)) => match spawner.projectile {
+                    Projectile::Missile => {
                         commands
                             .spawn_bundle(SpriteBundle {
                                 sprite: Sprite {
@@ -147,7 +150,7 @@ fn spawn_world(
                             })
                             .insert(spawner.clone());
                     }
-                    Enemy::Laser { angle, .. } => {
+                    Projectile::Laser { angle, .. } => {
                         commands
                             .spawn_bundle(AnimatedSprite::new(
                                 &mut animations,
@@ -168,6 +171,23 @@ fn spawn_world(
                             .insert(spawner.clone());
                     }
                 },
+                Some(Tile::Trap) => {
+                    commands
+                        .spawn_bundle(AnimatedSprite::new(
+                            &mut animations,
+                            &mut textures,
+                            &asset_server,
+                            AnimatedSpriteData {
+                                path: "trap.png".into(),
+                                frames: 6,
+                                size: tile_size,
+                                transform,
+                                ..AnimatedSpriteData::default()
+                            },
+                        ))
+                        .insert(CollisionShape::new_rectangle(tile_size.x, tile_size.y))
+                        .insert(Enemy);
+                }
                 None => {}
             }
         }
@@ -201,29 +221,15 @@ fn spawn_projectiles(
     for (spawner_transform, mut spawner) in spawners.iter_mut() {
         let spawn_position = spawner_transform.translation.truncate();
 
-        match spawner.enemy {
-            Enemy::Missile => {
-                if spawner.timer.tick(time.delta()).just_finished() {
-                    Enemy::Missile.spawn(
-                        &mut commands,
-                        &mut animations,
-                        &mut textures,
-                        &asset_server,
-                        spawn_position,
-                    );
-                }
-            }
-            Enemy::Laser { angle } => {
-                if spawner.timer.tick(time.delta()).just_finished() {
-                    Enemy::Laser { angle }.spawn(
-                        &mut commands,
-                        &mut animations,
-                        &mut textures,
-                        &asset_server,
-                        spawn_position,
-                    );
-                }
-            }
+        if spawner.timer.tick(time.delta()).just_finished() {
+            // Spawn projectile if timer has just finished
+            spawner.projectile.spawn(
+                &mut commands,
+                &mut animations,
+                &mut textures,
+                &asset_server,
+                spawn_position,
+            );
         }
     }
 }

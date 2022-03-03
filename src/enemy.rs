@@ -49,13 +49,16 @@ impl Bullet {
     }
 }
 
+#[derive(Component)]
+pub struct Enemy;
+
 #[derive(Component, Clone, Debug)]
-pub enum Enemy {
+pub enum Projectile {
     Missile,
     Laser { angle: f32 },
 }
 
-impl Enemy {
+impl Projectile {
     const MISSILE_SIZE: (f32, f32) = (24.0, 24.0);
     const MISSILE_VELOCITY: f32 = 400.0;
     pub const MISSILE_COOLDOWN: f32 = 1.0;
@@ -75,7 +78,7 @@ impl Enemy {
         // Set z-ordering to 2.0 to ensure that enemies are spawned above the player and spawners
         let spawn_position = spawn_position.extend(2.0);
         match self {
-            Enemy::Missile => {
+            Projectile::Missile => {
                 commands
                     .spawn_bundle(AnimatedSprite::new(
                         animations,
@@ -94,9 +97,10 @@ impl Enemy {
                         Self::MISSILE_SIZE.1,
                     ))
                     .insert(Pursuer::new(Self::MISSILE_VELOCITY))
-                    .insert(self.clone());
+                    .insert(self.clone())
+                    .insert(Enemy);
             }
-            Enemy::Laser { angle } => {
+            Projectile::Laser { angle } => {
                 commands
                     .spawn_bundle(AnimatedSprite::new(
                         animations,
@@ -120,7 +124,8 @@ impl Enemy {
                         Self::LASER_SIZE.1,
                     ))
                     .insert(Bullet::new(Self::LASER_VELOCITY, *angle))
-                    .insert(self.clone());
+                    .insert(self.clone())
+                    .insert(Enemy);
             }
         }
     }
@@ -128,8 +133,8 @@ impl Enemy {
 
 fn follow_player(
     time: Res<Time>,
-    player_transform: Query<&Transform, (With<Player>, Without<Enemy>)>,
-    mut enemies: Query<(&mut Transform, &Pursuer), With<Enemy>>,
+    player_transform: Query<&Transform, (With<Player>, Without<Projectile>)>,
+    mut enemies: Query<(&mut Transform, &Pursuer), With<Projectile>>,
     upgrades: Res<UpgradeTracker>,
 ) {
     for (mut transform, follow) in enemies.iter_mut() {
@@ -154,7 +159,7 @@ fn follow_player(
 
 fn move_bullet_enemies(
     time: Res<Time>,
-    mut enemies: Query<(&mut Transform, &Bullet), With<Enemy>>,
+    mut enemies: Query<(&mut Transform, &Bullet), With<Projectile>>,
     upgrades: Res<UpgradeTracker>,
 ) {
     for (mut transform, bullet) in enemies.iter_mut() {
