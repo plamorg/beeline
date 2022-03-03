@@ -67,7 +67,7 @@ fn spawn_death_anim(
         .insert(Play);
 }
 
-const SHARD_SPEED: f32 = 7.;
+const SHARD_SPEED: f32 = 700.0;
 
 fn end_death_anim(
     mut commands: Commands,
@@ -117,11 +117,13 @@ fn end_death_anim(
     }
 }
 
-fn update_flakes(mut transform: Query<(&DeathShard, &mut Transform)>) {
+fn update_flakes(time: Res<Time>, mut transform: Query<(&DeathShard, &mut Transform)>) {
     for (shard, mut transform) in transform.iter_mut() {
         let translation = &mut transform.translation;
-        translation.y += shard.sin_angle * SHARD_SPEED;
-        translation.x += shard.cos_angle * SHARD_SPEED;
+        let delta =
+            Vec2::new(shard.cos_angle, shard.sin_angle) * SHARD_SPEED * time.delta_seconds();
+        translation.x += delta.x;
+        translation.y += delta.y;
     }
 }
 

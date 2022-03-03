@@ -12,15 +12,36 @@ use std::f32::consts::PI;
 
 pub struct PlayerPlugin;
 
+#[derive(Component)]
+pub struct InvincibilityTimer(Timer);
+
+impl Default for InvincibilityTimer {
+    fn default() -> Self {
+        Self(Timer::from_seconds(0.2, false))
+    }
+}
+
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(
+            SystemSet::on_enter(AppState::Game).with_system(create_invincibility_timer),
+        )
+        .add_system_set(
             SystemSet::on_update(AppState::Game)
+                .with_system(tick_invincibility_timer)
                 .with_system(move_player)
                 .with_system(detect_collision)
                 .with_system(teleport),
         );
     }
+}
+
+fn create_invincibility_timer(mut commands: Commands) {
+    commands.insert_resource(InvincibilityTimer::default());
+}
+
+fn tick_invincibility_timer(time: Res<Time>, mut timer: ResMut<InvincibilityTimer>) {
+    timer.0.tick(time.delta());
 }
 
 #[derive(Component)]
@@ -118,16 +139,18 @@ fn move_player(
 }
 
 fn detect_collision(
+    invincibility_timer: Res<InvincibilityTimer>,
     mut state: ResMut<State<AppState>>,
-    enemies: Query<&CollisionShape, (With<Enemy>, Changed<CollisionShape>)>,
-    player: Query<&CollisionShape, (With<Player>, Changed<CollisionShape>)>,
+    enemies: Query<&CollisionShape, With<Enemy>>,
+    player: Query<&CollisionShape, With<Player>>,
 ) {
-    if let Ok(player) = player.get_single() {
-        for enemy in enemies.iter() {
-            if player.is_collided_with(enemy) {
-                println!("Player has collided with enemy");
-                state.set(AppState::Death).unwrap();
-                return;
+    if invincibility_timer.0.finished() {
+        if let Ok(player) = player.get_single() {
+            for enemy in enemies.iter() {
+                if player.is_collided_with(enemy) {
+                    state.set(AppState::Death).unwrap();
+                    return;
+                }
             }
         }
     }
