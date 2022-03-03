@@ -239,15 +239,18 @@ fn spawn_world(
                 }
                 Some(Tile::Goal) => {
                     commands
-                        .spawn_bundle(SpriteBundle {
-                            sprite: Sprite {
-                                color: Color::YELLOW,
-                                custom_size: Some(tile_size),
-                                ..Sprite::default()
+                        .spawn_bundle(AnimatedSprite::new(
+                            &mut animations,
+                            &mut textures,
+                            &asset_server,
+                            AnimatedSpriteData {
+                                path: "goal.png".into(),
+                                frames: 6,
+                                size: tile_size,
+                                transform,
+                                ..AnimatedSpriteData::default()
                             },
-                            transform,
-                            ..SpriteBundle::default()
-                        })
+                        ))
                         .insert(CollisionShape::new_rectangle(tile_size.x, tile_size.y))
                         .insert(Goal);
                 }
