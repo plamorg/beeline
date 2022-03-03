@@ -15,6 +15,7 @@ mod ui;
 mod upgrade_select;
 mod upgrades;
 mod util;
+mod victory;
 mod world;
 
 use benimator::AnimationPlugin;
@@ -38,6 +39,7 @@ pub enum AppState {
     Game,
     Death,
     Retry,
+    Victory,
 }
 
 pub fn despawn_all(mut commands: Commands, entities: Query<Entity>) {
@@ -55,6 +57,7 @@ fn main() {
         .add_system_set(SystemSet::on_exit(AppState::LevelSelect).with_system(despawn_all))
         .add_system_set(SystemSet::on_exit(AppState::Help).with_system(despawn_all))
         .add_system_set(SystemSet::on_exit(AppState::Retry).with_system(despawn_all))
+        .add_system_set(SystemSet::on_exit(AppState::Victory).with_system(despawn_all))
         .add_plugin(AnimationPlugin::default())
         .add_plugin(CameraPlugin)
         .add_plugin(CollisionPlugin)

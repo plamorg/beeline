@@ -45,11 +45,15 @@ enum Tile {
     Wall,
     Spawner(Spawner),
     Trap,
+    Goal,
 }
 
 impl Tile {
     const SIZE: f32 = 24.0;
 }
+
+#[derive(Component)]
+pub struct Goal;
 
 pub struct GameWorld {
     pub world_type: WorldType,
@@ -77,6 +81,7 @@ impl GameWorld {
                     }))),
                     'M' => Some(Tile::Spawner(Spawner::new(Projectile::Missile))),
                     'T' => Some(Tile::Trap),
+                    'G' => Some(Tile::Goal),
                     '*' => {
                         // The * character indicates player's spawn location
                         start = Some((j, i));
@@ -231,6 +236,20 @@ fn spawn_world(
                         ))
                         .insert(CollisionShape::new_rectangle(tile_size.x, tile_size.y))
                         .insert(Enemy);
+                }
+                Some(Tile::Goal) => {
+                    commands
+                        .spawn_bundle(SpriteBundle {
+                            sprite: Sprite {
+                                color: Color::YELLOW,
+                                custom_size: Some(tile_size),
+                                ..Sprite::default()
+                            },
+                            transform,
+                            ..SpriteBundle::default()
+                        })
+                        .insert(CollisionShape::new_rectangle(tile_size.x, tile_size.y))
+                        .insert(Goal);
                 }
                 None => {}
             }
