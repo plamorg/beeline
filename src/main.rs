@@ -4,6 +4,7 @@ mod camera;
 mod collision;
 mod death;
 mod enemy;
+mod game_overlay;
 mod help;
 mod level_select;
 mod menu;

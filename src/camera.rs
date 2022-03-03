@@ -1,7 +1,6 @@
 use crate::{
     player::Player,
-    ui::GameFont,
-    upgrades::{create_upgrades_overlay, Upgrade, UpgradeTracker},
+    upgrades::{Upgrade, UpgradeTracker},
     AppState,
 };
 use bevy::prelude::*;
@@ -22,16 +21,13 @@ impl MainCamera {
     const INTERPOLATION: f32 = 0.1;
 }
 
-fn spawn_camera(mut commands: Commands, font: Res<GameFont>) {
+fn spawn_camera(mut commands: Commands) {
     let mut orthographic_camera_bundle = OrthographicCameraBundle::new_2d();
     orthographic_camera_bundle.orthographic_projection.scale = 0.5;
 
     commands
         .spawn_bundle(orthographic_camera_bundle)
         .insert(MainCamera);
-
-    commands.spawn_bundle(UiCameraBundle::default());
-    create_upgrades_overlay(&mut commands, &font);
 }
 
 fn follow_player(

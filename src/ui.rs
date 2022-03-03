@@ -1,4 +1,5 @@
 use crate::{
+    game_overlay::GameOverlayPlugin,
     help::HelpPlugin,
     level_select::LevelSelectPlugin,
     menu::MenuPlugin,
@@ -65,6 +66,7 @@ impl PluginGroup for UiPlugins {
             .add(UpgradeSelectPlugin)
             .add(HelpPlugin)
             .add(RetryPlugin)
+            .add(GameOverlayPlugin)
             .add(UiPlugin);
     }
 }
