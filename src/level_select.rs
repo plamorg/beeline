@@ -1,6 +1,6 @@
 use crate::{
     ui::{spawn_back_button, GameFont},
-    world::World,
+    world::GameWorld,
     AppState,
 };
 use bevy::prelude::*;
@@ -160,7 +160,7 @@ fn manage_level_select_buttons(
         // Check if the button has been clicked
         if matches!(interaction, Interaction::Clicked) {
             commands.insert_resource(
-                World::load_level(&level_select_button.level_path, level_select_button.level)
+                GameWorld::load_level(&level_select_button.level_path, level_select_button.level)
                     .unwrap(),
             );
             state.set(AppState::Game).unwrap();

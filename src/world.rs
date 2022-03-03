@@ -11,11 +11,11 @@ use std::{
     f32::consts::PI,
     fs::File,
     io::{self, BufRead, BufReader},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
-enum WorldType {
-    Level(usize),
+pub enum WorldType {
+    Level { index: usize, path: PathBuf },
     Endless,
 }
 
@@ -49,15 +49,15 @@ impl Tile {
     const SIZE: f32 = 24.0;
 }
 
-pub struct World {
-    world_type: WorldType,
+pub struct GameWorld {
+    pub world_type: WorldType,
     // Coordinates of the player's spawn location: (x, y)
     player_start_coordinates: (usize, usize),
     layout: Vec<Vec<Option<Tile>>>,
 }
 
-impl World {
-    pub fn load_level<P: AsRef<Path>>(path: P, level: usize) -> io::Result<Self> {
+impl GameWorld {
+    pub fn load_level(path: &Path, index: usize) -> io::Result<Self> {
         // Open file and collect rows
         let file = File::open(path)?;
         let lines: Vec<io::Result<String>> = BufReader::new(file).lines().collect();
@@ -87,7 +87,10 @@ impl World {
         }
 
         Ok(Self {
-            world_type: WorldType::Level(level),
+            world_type: WorldType::Level {
+                index,
+                path: path.into(),
+            },
             player_start_coordinates: start.unwrap_or((0, 0)),
             layout,
         })
@@ -105,7 +108,7 @@ impl Plugin for WorldPlugin {
 
 fn spawn_world(
     mut commands: Commands,
-    world: Res<World>,
+    world: Res<GameWorld>,
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
     mut textures: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,

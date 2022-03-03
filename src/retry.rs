@@ -1,4 +1,8 @@
-use crate::{ui::GameFont, AppState};
+use crate::{
+    ui::GameFont,
+    world::{GameWorld, WorldType},
+    AppState,
+};
 use bevy::prelude::*;
 
 pub struct RetryPlugin;
@@ -120,12 +124,18 @@ fn create_retry_menu(mut commands: Commands, font: Res<GameFont>) {
 }
 
 fn manage_retry_buttons(
+    mut commands: Commands,
     mut state: ResMut<State<AppState>>,
+    world: Res<GameWorld>,
     interaction: Query<(&Interaction, &ButtonType), (Changed<Interaction>, With<Button>)>,
 ) {
     for (interaction, button_type) in interaction.iter() {
         match (interaction, button_type) {
             (Interaction::Clicked, ButtonType::Retry) => {
+                if let WorldType::Level { index, path } = &world.world_type {
+                    commands.insert_resource(GameWorld::load_level(path, *index).unwrap());
+                }
+
                 state.set(AppState::Game).unwrap();
             }
             (Interaction::Clicked, ButtonType::Menu) => {
