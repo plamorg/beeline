@@ -12,7 +12,7 @@ pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(SystemSet::on_enter(AppState::Menu).with_system(create_menu))
-            .add_system_set(SystemSet::on_update(AppState::Menu).with_system(manage_menu_button));
+            .add_system_set(SystemSet::on_update(AppState::Menu).with_system(manage_menu_buttons));
     }
 }
 
@@ -168,7 +168,7 @@ fn create_menu(
         });
 }
 
-fn manage_menu_button(
+fn manage_menu_buttons(
     mut state: ResMut<State<AppState>>,
     interaction: Query<(&Interaction, &ButtonType), (Changed<Interaction>, With<Button>)>,
 ) {
