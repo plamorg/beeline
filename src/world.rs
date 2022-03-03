@@ -98,6 +98,29 @@ impl GameWorld {
             layout,
         })
     }
+
+    fn get_wall_neighbors(&self, x: usize, y: usize) -> [bool; 4] {
+        let mut neighbors = [false; 4];
+        let height = self.layout.len();
+        let width = self.layout[y].len();
+
+        let delta_y: [isize; 4] = [-1, 0, 1, 0];
+        let delta_x: [isize; 4] = [0, 1, 0, -1];
+
+        for i in 0..4 {
+            let (nx, ny) = ((x as isize + delta_x[i]), (y as isize + delta_y[i]));
+
+            if nx >= 0 && ny >= 0 && nx < width as isize && ny < height as isize {
+                if let Some(Some(Tile::Wall)) = self.layout[ny as usize].get(nx as usize) {
+                    neighbors[i] = true;
+                    continue;
+                }
+            }
+            neighbors[i] = false;
+        }
+
+        neighbors
+    }
 }
 
 pub struct WorldPlugin;
@@ -126,12 +149,33 @@ fn spawn_world(
                 Transform::from_xyz(j as f32 * Tile::SIZE, -(i as f32 * Tile::SIZE), 0.0);
             match tile {
                 Some(Tile::Wall) => {
+                    let neighbors = world.get_wall_neighbors(j, i);
+                    let name = match neighbors {
+                        [true, false, true, false] => "wewe",
+                        [false, false, true, false] => "eewe",
+                        [true, false, true, true] => "weww",
+                        [true, true, true, false] => "wwwe",
+                        [false, true, false, true] => "ewew",
+                        [false, false, false, true] => "eeew",
+                        [false, true, false, false] => "ewee",
+                        [true, true, false, true] => "wwew",
+                        [true, true, true, true] => "wwww",
+                        [true, false, false, false] => "weee",
+                        [true, false, false, true] => "weew",
+                        [true, true, false, false] => "wwee",
+                        [false, true, true, true] => "ewww",
+                        [false, true, true, false] => "ewwe",
+                        [false, false, true, true] => "eeww",
+                        [false, false, false, false] => "eeee",
+                    };
+
+                    let path = format!("walls/{name}.png");
                     commands.spawn_bundle(SpriteBundle {
                         sprite: Sprite {
-                            color: Color::RED,
                             custom_size: Some(tile_size),
                             ..Sprite::default()
                         },
+                        texture: asset_server.load(&path),
                         transform,
                         ..SpriteBundle::default()
                     });
