@@ -59,7 +59,7 @@ pub struct GameWorld {
     pub layout: Vec<Vec<Option<Tile>>>,
 }
 
-pub const LEVELS: [(&'static str, &'static str); 4] = [
+pub const LEVELS: [(&'static str, &'static str); 5] = [
     ("Level 0", include_str!("../assets/levels/level0.tsv")),
     ("Level 1", include_str!("../assets/levels/level1.tsv")),
     (
@@ -70,6 +70,7 @@ pub const LEVELS: [(&'static str, &'static str); 4] = [
         "Drift",
         include_str!("../assets/levels/Levels_-_Beeline_-_Drift.tsv"),
     ),
+    ("Maze", include_str!("../assets/levels/maze.tsv")),
 ];
 
 impl GameWorld {
