@@ -1,4 +1,4 @@
-use std::time::Instant;
+use bevy::utils::Instant;
 
 use crate::{ui::GameFont, upgrades::create_upgrades_overlay, AppState};
 use bevy::prelude::*;

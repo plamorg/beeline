@@ -2,9 +2,10 @@
     inputs = {
         flake-utils.url = "github:numtide/flake-utils";
         naersk.url = "github:nix-community/naersk";
+        rust-overlay = { url = "github:oxalica/rust-overlay"; };
     };
 
-    outputs = { self, nixpkgs, flake-utils, naersk }:
+    outputs = { self, nixpkgs, flake-utils, naersk, rust-overlay }:
         flake-utils.lib.eachDefaultSystem (
             system: let
                 pkgs = nixpkgs.legacyPackages."${system}";
@@ -50,6 +51,11 @@
                     clang
                     lld
                 ];
+                shellHook = ''export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath (with pkgs; [
+                    alsa-lib
+                    udev
+                    vulkan-loader
+                ])}"'';
             in
                 rec {
                     # `nix build`
@@ -68,11 +74,20 @@
 
                     devShell = pkgs.mkShell {
                         nativeBuildInputs = with pkgs; [ rustc cargo rust-analyzer rustfmt ] ++ buildInputs;
-                        shellHook = ''export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath (with pkgs; [
-                            alsa-lib
-                            udev
-                            vulkan-loader
-                        ])}"'';
+                        inherit shellHook;
+                    };
+                    devShells.wasm = pkgs.mkShell {
+                        nativeBuildInputs = let pkgs = import nixpkgs { inherit system; overlays = [ rust-overlay.overlay ]; }; in with pkgs; [ 
+                            cargo 
+                            rust-analyzer 
+                            rustfmt 
+                            wasm-bindgen-cli
+                            (rust-bin.stable.latest.default.override {
+                              extensions = [ "rust-src" ];
+                              targets = [ "wasm32-unknown-unknown" ];
+                            })
+                        ] ++ buildInputs;
+                        inherit shellHook;
                     };
                 }
         );

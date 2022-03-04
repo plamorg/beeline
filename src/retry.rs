@@ -131,8 +131,8 @@ fn manage_retry_buttons(
     for (interaction, button_type) in interaction.iter() {
         match (interaction, button_type) {
             (Interaction::Clicked, ButtonType::Retry) => {
-                if let WorldType::Level { index, path } = &world.world_type {
-                    commands.insert_resource(GameWorld::load_level(path, *index).unwrap());
+                if let WorldType::Level { index, } = &world.world_type {
+                    commands.insert_resource(GameWorld::load_level(*index).unwrap());
                 }
 
                 state.set(AppState::Game).unwrap();
