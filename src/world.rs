@@ -59,7 +59,7 @@ pub struct GameWorld {
     pub layout: Vec<Vec<Option<Tile>>>,
 }
 
-pub const LEVELS: [(&'static str, &'static str); 7] = [
+pub const LEVELS: [(&'static str, &'static str); 8] = [
     (
         "Serpentine",
         include_str!("../assets/levels/Beeline_-_Serpentine.tsv"),
@@ -72,7 +72,8 @@ pub const LEVELS: [(&'static str, &'static str); 7] = [
     ("Down The Road", include_str!("../assets/levels/down-the-road.tsv")),
     ("Closing Doors", include_str!("../assets/levels/Levels_-_Beeline_-_Closing_Doors.tsv")),
     ("Snakes on a Plane", include_str!("../assets/levels/snakes-on-a-plane.tsv")),
-    ("Cornered", include_str!("../assets/levels/cornered.tsv"))
+    ("Cornered", include_str!("../assets/levels/cornered.tsv")),
+    ("Chicken", include_str!("../assets/levels/chicken.tsv"))
 ];
 
 impl GameWorld {

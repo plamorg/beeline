@@ -40,7 +40,7 @@ fn create_level_select(mut commands: Commands, font: Res<GameFont>) {
             ..NodeBundle::default()
         })
         .with_children(|parent| {
-            const LEVEL_SELECT_HEIGHT: f32 = 50.0;
+            const LEVEL_SELECT_HEIGHT: f32 = 70.0;
             // Spawn level select title
             parent.spawn_bundle(TextBundle {
                 style: Style {
