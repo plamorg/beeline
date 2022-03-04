@@ -77,7 +77,7 @@ fn update_delay_timer(
     let secs = TIMER_SECS - timer.elapsed_secs();
     text.sections[0].value = format!("{secs:.2}");
 
-    const CAMERA_SECS: f32 = (TIMER_SECS) * (2./3.);
+    const CAMERA_SECS: f32 = (TIMER_SECS) * (2. / 3.);
 
     // Lerp camera to player position
     let mut camera_transform = camera.single_mut();
@@ -87,7 +87,8 @@ fn update_delay_timer(
         if let Some(speed) = camera_speed.speed {
             cam_speed = speed;
         } else {
-            cam_speed = (player_transform.translation.truncate() - camera_transform.translation.truncate())
+            cam_speed = (player_transform.translation.truncate()
+                - camera_transform.translation.truncate())
                 / CAMERA_SECS;
             camera_speed.speed = Some(cam_speed);
         }
@@ -102,8 +103,12 @@ fn update_delay_timer(
             // In this way, the total distance traveled should be 1.
             indefinite_integral(t + dt) - indefinite_integral(t)
         }
-        let ds = delta_distance(timer.elapsed_secs() / CAMERA_SECS, time.delta_seconds() / CAMERA_SECS);
-        camera_transform.translation = (camera_transform.translation.truncate() + cam_speed * CAMERA_SECS * ds)
+        let ds = delta_distance(
+            timer.elapsed_secs() / CAMERA_SECS,
+            time.delta_seconds() / CAMERA_SECS,
+        );
+        camera_transform.translation = (camera_transform.translation.truncate()
+            + cam_speed * CAMERA_SECS * ds)
             .extend(camera_transform.translation.z);
     } else {
         camera_transform.translation = player_transform.translation;

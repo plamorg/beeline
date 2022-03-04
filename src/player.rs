@@ -154,10 +154,10 @@ fn detect_collision(
                     return;
                 }
             }
-            for goal in goals.iter() { 
-                if player.is_collided_with(goal) { 
-                    state.set(AppState::Victory).unwrap(); 
-                } 
+            for goal in goals.iter() {
+                if player.is_collided_with(goal) {
+                    state.set(AppState::Victory).unwrap();
+                }
             }
         }
     }
