@@ -1,7 +1,6 @@
 use crate::{
     player::Player,
-    ui::GameFont,
-    upgrades::{create_upgrades_overlay, Upgrade, UpgradeTracker},
+    upgrades::{Upgrade, UpgradeTracker},
     AppState,
 };
 use bevy::prelude::*;
@@ -10,8 +9,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::Game).with_system(spawn_camera))
-            .add_system_set(SystemSet::on_update(AppState::Game).with_system(follow_player));
+        app.add_system_set(SystemSet::on_update(AppState::Game).with_system(follow_player));
     }
 }
 
@@ -22,16 +20,16 @@ impl MainCamera {
     const INTERPOLATION: f32 = 0.1;
 }
 
-fn spawn_camera(mut commands: Commands, font: Res<GameFont>) {
+pub fn spawn_camera(commands: &mut Commands, position: Vec2) {
     let mut orthographic_camera_bundle = OrthographicCameraBundle::new_2d();
     orthographic_camera_bundle.orthographic_projection.scale = 0.5;
+
+    orthographic_camera_bundle.transform.translation.x = position.x;
+    orthographic_camera_bundle.transform.translation.y = position.y;
 
     commands
         .spawn_bundle(orthographic_camera_bundle)
         .insert(MainCamera);
-
-    commands.spawn_bundle(UiCameraBundle::default());
-    create_upgrades_overlay(&mut commands, &font);
 }
 
 fn follow_player(

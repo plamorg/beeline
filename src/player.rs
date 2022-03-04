@@ -3,6 +3,7 @@ use crate::{
     enemy::Enemy,
     upgrades::{Upgrade, UpgradeTracker},
     util::{polar_to_cartesian, AnimatedSprite, AnimatedSpriteData},
+    world::Goal,
     AppState,
 };
 use benimator::SpriteSheetAnimation;
@@ -55,10 +56,10 @@ impl Player {
 // Spawn the player in the given start location
 // This function should only be called by the world plugin
 pub fn spawn_player(
-    mut commands: Commands,
+    commands: &mut Commands,
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
     mut textures: ResMut<Assets<TextureAtlas>>,
-    asset_server: Res<AssetServer>,
+    asset_server: &Res<AssetServer>,
     upgrades: Res<UpgradeTracker>,
     start_location: Vec2,
 ) {
@@ -142,6 +143,7 @@ fn detect_collision(
     invincibility_timer: Res<InvincibilityTimer>,
     mut state: ResMut<State<AppState>>,
     enemies: Query<&CollisionShape, With<Enemy>>,
+    goal: Query<&CollisionShape, With<Goal>>,
     player: Query<&CollisionShape, With<Player>>,
 ) {
     if invincibility_timer.0.finished() {
@@ -150,6 +152,11 @@ fn detect_collision(
                 if player.is_collided_with(enemy) {
                     state.set(AppState::Death).unwrap();
                     return;
+                }
+            }
+            if let Ok(goal) = goal.get_single() {
+                if player.is_collided_with(goal) {
+                    state.set(AppState::Victory).unwrap();
                 }
             }
         }

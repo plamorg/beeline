@@ -37,7 +37,6 @@ fn create_retry_menu(mut commands: Commands, font: Res<GameFont>) {
             ..NodeBundle::default()
         })
         .with_children(|parent| {
-            // Spawn upgrade select title
             parent.spawn_bundle(TextBundle {
                 style: Style {
                     position_type: PositionType::Absolute,

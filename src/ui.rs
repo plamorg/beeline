@@ -1,9 +1,11 @@
 use crate::{
+    game_overlay::GameOverlayPlugin,
     help::HelpPlugin,
     level_select::LevelSelectPlugin,
     menu::MenuPlugin,
     retry::RetryPlugin,
     upgrade_select::{UpgradeButton, UpgradeSelectPlugin},
+    victory::VictoryPlugin,
     AppState,
 };
 use bevy::{app::PluginGroupBuilder, prelude::*};
@@ -49,8 +51,9 @@ impl Plugin for UiPlugin {
                     .with_system(manage_button_colors)
                     .with_system(manage_back_button),
             )
+            .add_system_set(SystemSet::on_update(AppState::Retry).with_system(manage_button_colors))
             .add_system_set(
-                SystemSet::on_update(AppState::Retry).with_system(manage_button_colors),
+                SystemSet::on_update(AppState::Victory).with_system(manage_button_colors),
             );
     }
 }
@@ -65,6 +68,8 @@ impl PluginGroup for UiPlugins {
             .add(UpgradeSelectPlugin)
             .add(HelpPlugin)
             .add(RetryPlugin)
+            .add(GameOverlayPlugin)
+            .add(VictoryPlugin)
             .add(UiPlugin);
     }
 }

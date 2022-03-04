@@ -1,4 +1,5 @@
 use crate::{
+    camera,
     enemy::{Enemy, Projectile},
     player,
     upgrades::UpgradeTracker,
@@ -45,11 +46,15 @@ enum Tile {
     Wall,
     Spawner(Spawner),
     Trap,
+    Goal,
 }
 
 impl Tile {
     const SIZE: f32 = 24.0;
 }
+
+#[derive(Component)]
+pub struct Goal;
 
 pub struct GameWorld {
     pub world_type: WorldType,
@@ -77,6 +82,7 @@ impl GameWorld {
                     }))),
                     'M' => Some(Tile::Spawner(Spawner::new(Projectile::Missile))),
                     'T' => Some(Tile::Trap),
+                    'G' => Some(Tile::Goal),
                     '*' => {
                         // The * character indicates player's spawn location
                         start = Some((j, i));
@@ -141,6 +147,7 @@ fn spawn_world(
     upgrades: Res<UpgradeTracker>,
 ) {
     let tile_size = Vec2::splat(Tile::SIZE);
+    let mut goal_position = None;
 
     // Iterate through the world layout and spawn tiles accordingly
     for (i, row) in world.layout.iter().enumerate() {
@@ -232,6 +239,24 @@ fn spawn_world(
                         .insert(CollisionShape::new_rectangle(tile_size.x, tile_size.y))
                         .insert(Enemy);
                 }
+                Some(Tile::Goal) => {
+                    commands
+                        .spawn_bundle(AnimatedSprite::new(
+                            &mut animations,
+                            &mut textures,
+                            &asset_server,
+                            AnimatedSpriteData {
+                                path: "goal.png".into(),
+                                frames: 6,
+                                size: tile_size,
+                                transform,
+                                ..AnimatedSpriteData::default()
+                            },
+                        ))
+                        .insert(CollisionShape::new_rectangle(tile_size.x, tile_size.y))
+                        .insert(Goal);
+                    goal_position = Some(transform.translation.truncate());
+                }
                 None => {}
             }
         }
@@ -245,13 +270,15 @@ fn spawn_world(
 
     // Spawn the player
     player::spawn_player(
-        commands,
+        &mut commands,
         animations,
         textures,
-        asset_server,
+        &asset_server,
         upgrades,
         player_start_location,
     );
+
+    camera::spawn_camera(&mut commands, goal_position.unwrap_or(Vec2::ZERO));
 }
 
 fn spawn_projectiles(
