@@ -6,7 +6,7 @@ use bevy::utils::Duration;
 use crate::camera::MainCamera;
 use crate::player::Player;
 use crate::ui::GameFont;
-use crate::world::{spawn_world, GameWorld};
+use crate::world::spawn_world;
 use crate::AppState;
 
 pub struct StartDelayPlugin;
@@ -30,47 +30,56 @@ struct CameraSpeed {
 }
 
 fn create_delay_timer(mut commands: Commands, font: Res<GameFont>) {
-    println!("enter create delay state");
     commands.spawn_bundle(UiCameraBundle::default());
 
     commands
-        .spawn_bundle(TextBundle {
+        .spawn_bundle(NodeBundle {
             style: Style {
-                position_type: PositionType::Absolute,
-                position: Rect {
-                    top: Val::Percent(45.0),
-                    left: Val::Percent(45.0),
-                    ..Rect::default()
-                },
+                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
                 ..Style::default()
             },
-            text: Text::with_section(
-                "",
-                TextStyle {
-                    font: font.get_handle(),
-                    font_size: 50.0,
-                    ..TextStyle::default()
-                },
-                TextAlignment::default(),
-            ),
-            ..TextBundle::default()
+            color: Color::NONE.into(),
+            ..NodeBundle::default()
         })
-        .insert(Timer::new(Duration::from_secs(TIMER_SECS as u64), false))
-        .insert(CameraSpeed { speed: None });
+        .with_children(|parent| {
+            parent
+                .spawn_bundle(TextBundle {
+                    style: Style {
+                        position_type: PositionType::Absolute,
+                        position: Rect {
+                            top: Val::Percent(40.0),
+                            ..Rect::default()
+                        },
+                        ..Style::default()
+                    },
+                    text: Text::with_section(
+                        "",
+                        TextStyle {
+                            font: font.get_handle(),
+                            font_size: 50.0,
+                            ..TextStyle::default()
+                        },
+                        TextAlignment::default(),
+                    ),
+                    ..TextBundle::default()
+                })
+                .insert(Timer::new(Duration::from_secs(TIMER_SECS as u64), false))
+                .insert(CameraSpeed { speed: None });
+        });
 }
 
 fn update_delay_timer(
     mut camera: Query<&mut Transform, With<MainCamera>>,
     player_transform: Query<&Transform, (With<Player>, Without<MainCamera>)>,
     mut state: ResMut<State<AppState>>,
-    world: Res<GameWorld>,
     time: Res<Time>,
     mut text: Query<(&mut Text, &mut Timer, &mut CameraSpeed)>,
 ) {
     let (mut text, mut timer, mut camera_speed) = text.single_mut();
     timer.tick(time.delta());
     if timer.finished() {
-        println!("start delay finished");
         state.set(AppState::Game).unwrap();
         return;
     }
