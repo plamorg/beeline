@@ -143,7 +143,7 @@ fn detect_collision(
     invincibility_timer: Res<InvincibilityTimer>,
     mut state: ResMut<State<AppState>>,
     enemies: Query<&CollisionShape, With<Enemy>>,
-    goal: Query<&CollisionShape, With<Goal>>,
+    goals: Query<&CollisionShape, With<Goal>>,
     player: Query<&CollisionShape, With<Player>>,
 ) {
     if invincibility_timer.0.finished() {
@@ -154,10 +154,10 @@ fn detect_collision(
                     return;
                 }
             }
-            if let Ok(goal) = goal.get_single() {
-                if player.is_collided_with(goal) {
-                    state.set(AppState::Victory).unwrap();
-                }
+            for goal in goals.iter() { 
+                if player.is_collided_with(goal) { 
+                    state.set(AppState::Victory).unwrap(); 
+                } 
             }
         }
     }
