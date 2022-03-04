@@ -68,8 +68,8 @@ fn create_help(mut commands: Commands, font: Res<GameFont>) {
                         "Head over to the upgrades menu to gain an \"unfair\" advantage!\n",
                         "\n",
                         "Some upgrades can be activated using mouse buttons:\n",
-                        "Left Click - Use primary upgrade\n",
-                        "Right Click - Use secondary upgrade",
+                        "Left Click or Q - Use primary upgrade\n",
+                        "Right Click or E - Use secondary upgrade",
                     ];
 
                     parent.spawn_bundle(TextBundle {

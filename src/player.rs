@@ -167,11 +167,12 @@ fn detect_collision(
 fn teleport(
     windows: Res<Windows>,
     camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    keyboard_input: Res<Input<KeyCode>>,
     button_input: Res<Input<MouseButton>>,
     upgrades: Res<UpgradeTracker>,
     mut player: Query<&mut Transform, With<Player>>,
 ) {
-    if upgrades.was_upgrade_activated(button_input, Upgrade::Teleport) {
+    if upgrades.was_upgrade_activated(keyboard_input, button_input, Upgrade::Teleport) {
         let (camera, camera_transform) = camera.single();
         let window = windows.get(camera.window).unwrap();
 
