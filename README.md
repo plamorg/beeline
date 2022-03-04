@@ -8,7 +8,8 @@ _The last known specimens of the Andor flower, the flower with the tastiest nect
 
 Head over to the **upgrades** menu to pick out upgrades to optimize your playstyle and gain an **unfair advantage**.
 
-Upgrades consist of both passive and active abilities. Active abilities can be activated with either the left or right mouse button, depending on which upgrade slot it is in.
+Upgrades consist of both passive and active abilities.
+Active abilities can be activated with either the left mouse button (or <kbd>Q</kbd>) or the right mouse button (or <kbd>E</kbd>), depending on which upgrade slot it is in.
 
 Made with [Bevy Engine](https://bevyengine.org/).
 
