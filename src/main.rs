@@ -11,6 +11,7 @@ mod menu;
 mod player;
 mod pursue;
 mod retry;
+mod start_delay;
 mod ui;
 mod upgrade_select;
 mod upgrades;
@@ -26,6 +27,7 @@ use collision::CollisionPlugin;
 use death::DeathPlugin;
 use enemy::EnemyPlugin;
 use player::PlayerPlugin;
+use start_delay::StartDelayPlugin;
 use ui::UiPlugins;
 use upgrades::UpgradesPlugin;
 use world::WorldPlugin;
@@ -37,6 +39,7 @@ pub enum AppState {
     LevelSelect,
     Help,
     Game,
+    StartDelay,
     Death,
     Retry,
     Victory,
@@ -58,6 +61,7 @@ fn main() {
         .add_system_set(SystemSet::on_exit(AppState::Help).with_system(despawn_all))
         .add_system_set(SystemSet::on_exit(AppState::Retry).with_system(despawn_all))
         .add_system_set(SystemSet::on_exit(AppState::Victory).with_system(despawn_all))
+        .add_system_set(SystemSet::on_exit(AppState::StartDelay).with_system(despawn_all))
         .add_plugin(AnimationPlugin::default())
         .add_plugin(CameraPlugin)
         .add_plugin(CollisionPlugin)
@@ -67,5 +71,6 @@ fn main() {
         .add_plugin(UpgradesPlugin)
         .add_plugin(WorldPlugin)
         .add_plugin(DeathPlugin)
+        .add_plugin(StartDelayPlugin)
         .run();
 }

@@ -123,7 +123,7 @@ fn manage_level_select_buttons(
         // Check if the button has been clicked
         if matches!(interaction, Interaction::Clicked) {
             commands.insert_resource(GameWorld::load_level(level_select_button.level).unwrap());
-            state.set(AppState::Game).unwrap();
+            state.set(AppState::StartDelay).unwrap();
         }
     }
 }

@@ -50,7 +50,7 @@ pub struct Player;
 
 impl Player {
     pub const SIZE: f32 = 24.0;
-    const VELOCITY: f32 = 500.0;
+    const VELOCITY: f32 = 375.0;
 }
 
 // Spawn the player in the given start location
@@ -79,9 +79,9 @@ pub fn spawn_player(
     };
 
     let collision_shape = if upgrades.has_upgrade(Upgrade::Shrink) {
-        CollisionShape::new_circle(Player::SIZE / 4.0)
+        CollisionShape::new_circle((Player::SIZE - 8.) / 4.0)
     } else {
-        CollisionShape::new_circle(Player::SIZE / 2.0)
+        CollisionShape::new_circle((Player::SIZE - 8.) / 2.0)
     };
 
     // Spawn player
@@ -143,18 +143,18 @@ fn detect_collision(
     invincibility_timer: Res<InvincibilityTimer>,
     mut state: ResMut<State<AppState>>,
     enemies: Query<&CollisionShape, With<Enemy>>,
-    goal: Query<&CollisionShape, With<Goal>>,
+    goals: Query<&CollisionShape, With<Goal>>,
     player: Query<&CollisionShape, With<Player>>,
 ) {
     if invincibility_timer.0.finished() {
         if let Ok(player) = player.get_single() {
             for enemy in enemies.iter() {
                 if player.is_collided_with(enemy) {
-                    //state.set(AppState::Death).unwrap();
-                    //return;
+                    state.set(AppState::Death).unwrap();
+                    return;
                 }
             }
-            if let Ok(goal) = goal.get_single() {
+            for goal in goals.iter() {
                 if player.is_collided_with(goal) {
                     state.set(AppState::Victory).unwrap();
                 }
