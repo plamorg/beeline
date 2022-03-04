@@ -4,7 +4,6 @@ use crate::{
     AppState,
 };
 use bevy::prelude::*;
-use std::{ffi::OsStr, fs, io, path::PathBuf};
 
 pub struct LevelSelectPlugin;
 
@@ -95,9 +94,7 @@ fn create_level_select(mut commands: Commands, font: Res<GameFont>) {
                                 },
                                 ..ButtonBundle::default()
                             })
-                            .insert(LevelSelectButton {
-                                level,
-                            })
+                            .insert(LevelSelectButton { level })
                             .with_children(|parent| {
                                 parent.spawn_bundle(TextBundle {
                                     text: Text::with_section(
@@ -125,10 +122,7 @@ fn manage_level_select_buttons(
     for (interaction, level_select_button) in interaction.iter() {
         // Check if the button has been clicked
         if matches!(interaction, Interaction::Clicked) {
-            commands.insert_resource(
-                GameWorld::load_level(level_select_button.level)
-                    .unwrap(),
-            );
+            commands.insert_resource(GameWorld::load_level(level_select_button.level).unwrap());
             state.set(AppState::Game).unwrap();
         }
     }
