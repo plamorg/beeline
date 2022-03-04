@@ -1,4 +1,5 @@
 use crate::{
+    camera,
     enemy::{Enemy, Projectile},
     player,
     upgrades::UpgradeTracker,
@@ -146,6 +147,7 @@ fn spawn_world(
     upgrades: Res<UpgradeTracker>,
 ) {
     let tile_size = Vec2::splat(Tile::SIZE);
+    let mut goal_position = None;
 
     // Iterate through the world layout and spawn tiles accordingly
     for (i, row) in world.layout.iter().enumerate() {
@@ -253,6 +255,7 @@ fn spawn_world(
                         ))
                         .insert(CollisionShape::new_rectangle(tile_size.x, tile_size.y))
                         .insert(Goal);
+                    goal_position = Some(transform.translation.truncate());
                 }
                 None => {}
             }
@@ -267,13 +270,15 @@ fn spawn_world(
 
     // Spawn the player
     player::spawn_player(
-        commands,
+        &mut commands,
         animations,
         textures,
-        asset_server,
+        &asset_server,
         upgrades,
         player_start_location,
     );
+
+    camera::spawn_camera(&mut commands, goal_position.unwrap_or(Vec2::ZERO));
 }
 
 fn spawn_projectiles(

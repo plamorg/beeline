@@ -56,10 +56,10 @@ impl Player {
 // Spawn the player in the given start location
 // This function should only be called by the world plugin
 pub fn spawn_player(
-    mut commands: Commands,
+    commands: &mut Commands,
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
     mut textures: ResMut<Assets<TextureAtlas>>,
-    asset_server: Res<AssetServer>,
+    asset_server: &Res<AssetServer>,
     upgrades: Res<UpgradeTracker>,
     start_location: Vec2,
 ) {
