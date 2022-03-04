@@ -59,21 +59,30 @@ pub struct GameWorld {
     pub layout: Vec<Vec<Option<Tile>>>,
 }
 
-pub const LEVELS: [(&'static str, &'static str); 8] = [
+pub const LEVELS: [(&str, &str); 8] = [
+    (
+        "Closing Doors",
+        include_str!("../assets/levels/Levels_-_Beeline_-_Closing_Doors.tsv"),
+    ),
+    ("Cornered", include_str!("../assets/levels/cornered.tsv")),
     (
         "Serpentine",
         include_str!("../assets/levels/Beeline_-_Serpentine.tsv"),
     ),
     (
+        "Snakes on a Plane",
+        include_str!("../assets/levels/snakes-on-a-plane.tsv"),
+    ),
+    ("Chicken", include_str!("../assets/levels/chicken.tsv")),
+    ("Maze", include_str!("../assets/levels/maze.tsv")),
+    (
+        "Down The Road",
+        include_str!("../assets/levels/down-the-road.tsv"),
+    ),
+    (
         "Drift",
         include_str!("../assets/levels/Levels_-_Beeline_-_Drift.tsv"),
     ),
-    ("Maze", include_str!("../assets/levels/maze.tsv")),
-    ("Down The Road", include_str!("../assets/levels/down-the-road.tsv")),
-    ("Closing Doors", include_str!("../assets/levels/Levels_-_Beeline_-_Closing_Doors.tsv")),
-    ("Snakes on a Plane", include_str!("../assets/levels/snakes-on-a-plane.tsv")),
-    ("Cornered", include_str!("../assets/levels/cornered.tsv")),
-    ("Chicken", include_str!("../assets/levels/chicken.tsv"))
 ];
 
 impl GameWorld {
