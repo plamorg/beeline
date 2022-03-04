@@ -150,8 +150,8 @@ fn detect_collision(
         if let Ok(player) = player.get_single() {
             for enemy in enemies.iter() {
                 if player.is_collided_with(enemy) {
-                    state.set(AppState::Death).unwrap();
-                    return;
+                    //state.set(AppState::Death).unwrap();
+                    //return;
                 }
             }
             if let Ok(goal) = goal.get_single() {

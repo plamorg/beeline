@@ -1,6 +1,6 @@
 use crate::{
     camera,
-    enemy::{Enemy, Projectile},
+    enemy::{Enemy, Projectile, Wall},
     player,
     upgrades::UpgradeTracker,
     util::{AnimatedSprite, AnimatedSpriteData},
@@ -18,7 +18,7 @@ pub enum WorldType {
 }
 
 #[derive(Component, Clone, Debug)]
-struct Spawner {
+pub struct Spawner {
     projectile: Projectile,
     timer: Timer,
 }
@@ -38,7 +38,7 @@ impl Spawner {
 }
 
 #[derive(Debug)]
-enum Tile {
+pub enum Tile {
     Wall,
     Spawner(Spawner),
     Trap,
@@ -46,7 +46,7 @@ enum Tile {
 }
 
 impl Tile {
-    const SIZE: f32 = 24.0;
+    pub const SIZE: f32 = 24.0;
 }
 
 #[derive(Component)]
@@ -56,7 +56,7 @@ pub struct GameWorld {
     pub world_type: WorldType,
     // Coordinates of the player's spawn location: (x, y)
     player_start_coordinates: (usize, usize),
-    layout: Vec<Vec<Option<Tile>>>,
+    pub layout: Vec<Vec<Option<Tile>>>,
 }
 
 pub const LEVELS: [(&str, &str); 2] = [
@@ -185,6 +185,7 @@ fn spawn_world(
                             ..SpriteBundle::default()
                         })
                         .insert(CollisionShape::new_rectangle(tile_size.x, tile_size.y))
+                        .insert(Wall)
                         .insert(Enemy);
                 }
                 Some(Tile::Spawner(spawner)) => match spawner.projectile {
