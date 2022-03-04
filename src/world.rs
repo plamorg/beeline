@@ -17,7 +17,7 @@ use std::{
 };
 
 pub enum WorldType {
-    Level { index: usize, path: PathBuf },
+    Level { index: usize, },
     Endless,
 }
 
@@ -63,15 +63,19 @@ pub struct GameWorld {
     layout: Vec<Vec<Option<Tile>>>,
 }
 
+pub const LEVELS: [(&'static str, &'static str); 2] = [
+    ("Level 0", include_str!("../assets/levels/level0.tsv")),
+    ("Level 1", include_str!("../assets/levels/level1.tsv"))
+];
+
 impl GameWorld {
-    pub fn load_level(path: &Path, index: usize) -> io::Result<Self> {
+    pub fn load_level(level: usize) -> io::Result<Self> {
         // Open file and collect rows
-        let file = File::open(path)?;
-        let lines: Vec<io::Result<String>> = BufReader::new(file).lines().collect();
+        let lines = LEVELS[level].1.lines();
 
         let mut start = None;
         let mut layout = Vec::new();
-        for (i, line) in lines.iter().flatten().enumerate() {
+        for (i, line) in lines.enumerate() {
             let mut row = Vec::new();
             for (j, value) in line.split('\t').enumerate() {
                 let tile = match value.chars().next().unwrap() {
@@ -97,8 +101,7 @@ impl GameWorld {
 
         Ok(Self {
             world_type: WorldType::Level {
-                index,
-                path: path.into(),
+                index: level,
             },
             player_start_coordinates: start.unwrap_or((0, 0)),
             layout,
