@@ -10,7 +10,7 @@
             system: let
                 pkgs = nixpkgs.legacyPackages."${system}";
                 naersk-lib = naersk.lib."${system}";
-                buildInputs = with pkgs; [ 
+                buildInputs = with pkgs; (if pkgs.stdenv.isLinux then [ 
                     pkg-config 
                     alsa-lib 
                     libudev
@@ -48,14 +48,21 @@
                     vulkan-loader
                     freeglut
                     libvdpau
+                ] else []) ++ (if pkgs.stdenv.isDarwin then with pkgs.darwin.apple_sdk.frameworks; [
+                    libiconv
+                    Metal
+                    CoreGraphics
+                    CoreVideo
+                    AppKit
+                ] else []) ++ [
                     clang
                     lld
                 ];
-                shellHook = ''export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath (with pkgs; [
+                shellHook = if pkgs.stdenv.isLinux then ''export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${pkgs.lib.makeLibraryPath (with pkgs; [
                     alsa-lib
                     udev
                     vulkan-loader
-                ])}"'';
+                ])}"'' else "";
             in
                 rec {
                     # `nix build`

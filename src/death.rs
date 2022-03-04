@@ -42,7 +42,7 @@ fn spawn_death_anim(
     asset_server: Res<AssetServer>,
     mut textures: ResMut<Assets<TextureAtlas>>,
 ) {
-    commands.spawn_bundle((Timer::from_seconds(3.5, false), DeathTimer));
+    commands.spawn_bundle((Timer::from_seconds(3.0, false), DeathTimer));
 
     let (player_entity, player_transform) = player_info.single();
     let player_transform = *player_transform;
@@ -59,7 +59,7 @@ fn spawn_death_anim(
                 frames: 73,
                 size: Vec2::splat(Player::SIZE),
                 transform: player_transform,
-                delay: Duration::from_millis(35),
+                delay: Duration::from_millis(20),
                 mode: AnimationMode::Once,
             },
         ))

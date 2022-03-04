@@ -65,11 +65,11 @@ pub enum Projectile {
 
 impl Projectile {
     const MISSILE_SIZE: (f32, f32) = (24.0, 24.0);
-    const MISSILE_VELOCITY: f32 = 400.0;
+    const MISSILE_VELOCITY: f32 = 300.0;
     pub const MISSILE_COOLDOWN: f32 = 1.0;
 
     const LASER_SIZE: (f32, f32) = (12.0, 24.0);
-    const LASER_VELOCITY: f32 = 300.0;
+    const LASER_VELOCITY: f32 = 225.0;
     pub const LASER_COOLDOWN: f32 = 0.1;
 
     pub fn spawn(

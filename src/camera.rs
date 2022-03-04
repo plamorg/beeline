@@ -48,9 +48,8 @@ fn follow_player(
             1.0
         };
 
-    camera_transform.translation = camera_transform
+    camera_transform.translation = player_transform
         .translation
         .truncate()
-        .lerp(player_transform.translation.truncate(), interpolation)
         .extend(camera_transform.translation.z);
 }

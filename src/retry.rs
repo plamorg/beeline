@@ -135,7 +135,7 @@ fn manage_retry_buttons(
                     commands.insert_resource(GameWorld::load_level(*index).unwrap());
                 }
 
-                state.set(AppState::Game).unwrap();
+                state.set(AppState::StartDelay).unwrap();
             }
             (Interaction::Clicked, ButtonType::Menu) => {
                 state.set(AppState::Menu).unwrap();

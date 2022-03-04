@@ -55,13 +55,21 @@ pub struct Goal;
 pub struct GameWorld {
     pub world_type: WorldType,
     // Coordinates of the player's spawn location: (x, y)
-    player_start_coordinates: (usize, usize),
+    pub player_start_coordinates: (usize, usize),
     pub layout: Vec<Vec<Option<Tile>>>,
 }
 
-pub const LEVELS: [(&str, &str); 2] = [
+pub const LEVELS: [(&'static str, &'static str); 4] = [
     ("Level 0", include_str!("../assets/levels/level0.tsv")),
     ("Level 1", include_str!("../assets/levels/level1.tsv")),
+    (
+        "Serpentine",
+        include_str!("../assets/levels/Beeline_-_Serpentine.tsv"),
+    ),
+    (
+        "Drift",
+        include_str!("../assets/levels/Levels_-_Beeline_-_Drift.tsv"),
+    ),
 ];
 
 impl GameWorld {
@@ -74,7 +82,7 @@ impl GameWorld {
         for (i, line) in lines.enumerate() {
             let mut row = Vec::new();
             for (j, value) in line.split('\t').enumerate() {
-                let tile = match value.chars().next().unwrap() {
+                let tile = value.chars().next().and_then(|char| match char {
                     '.' => None,
                     '#' => Some(Tile::Wall),
                     'L' => Some(Tile::Spawner(Spawner::new(Projectile::Laser {
@@ -89,7 +97,7 @@ impl GameWorld {
                         None
                     }
                     _ => panic!("Invalid value: {value}"),
-                };
+                });
                 row.push(tile);
             }
             layout.push(row);
@@ -135,7 +143,7 @@ impl Plugin for WorldPlugin {
     }
 }
 
-fn spawn_world(
+pub fn spawn_world(
     mut commands: Commands,
     world: Res<GameWorld>,
     mut animations: ResMut<Assets<SpriteSheetAnimation>>,
