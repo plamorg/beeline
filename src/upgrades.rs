@@ -145,11 +145,16 @@ impl UpgradeTracker {
 
     pub fn was_upgrade_activated(
         &self,
+        keyboard_input: Res<Input<KeyCode>>,
         button_input: Res<Input<MouseButton>>,
         upgrade: Upgrade,
     ) -> bool {
-        (self.primary == Some(upgrade) && button_input.just_pressed(MouseButton::Left))
-            || (self.secondary == Some(upgrade) && button_input.just_pressed(MouseButton::Right))
+        (self.primary == Some(upgrade)
+            && (button_input.just_pressed(MouseButton::Left)
+                || keyboard_input.just_pressed(KeyCode::Q)))
+            || (self.secondary == Some(upgrade)
+                && (button_input.just_pressed(MouseButton::Right)
+                    || keyboard_input.just_pressed(KeyCode::E)))
     }
 
     pub fn has_upgrade(&self, upgrade: Upgrade) -> bool {
