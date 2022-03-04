@@ -4,6 +4,7 @@ use crate::{
     upgrades::{Upgrade, UpgradeTracker},
     util::polar_to_cartesian,
     util::{AnimatedSprite, AnimatedSpriteData},
+    world::{GameWorld, Tile},
     AppState,
 };
 use benimator::SpriteSheetAnimation;
@@ -20,6 +21,7 @@ impl Plugin for EnemyPlugin {
         app.add_system_set(
             SystemSet::on_update(AppState::Game)
                 .with_system(follow_player)
+                .with_system(detect_wall_collision)
                 .with_system(move_bullet_enemies),
         );
     }
@@ -51,6 +53,9 @@ impl Bullet {
 
 #[derive(Component)]
 pub struct Enemy;
+
+#[derive(Component)]
+pub struct Wall;
 
 #[derive(Component, Clone, Debug)]
 pub enum Projectile {
@@ -173,5 +178,30 @@ fn move_bullet_enemies(
             })
         .extend(0.0);
         transform.scale = transform.scale.lerp(Vec3::ONE, LASER_SCALE_INTERPOLATION);
+    }
+}
+
+fn detect_wall_collision(
+    mut commands: Commands,
+    world: Res<GameWorld>,
+    enemies: Query<(&Transform, Entity), (With<Enemy>, Without<Wall>)>,
+) {
+    for (transform, entity) in enemies.iter() {
+        let coordinates = (
+            (transform.translation.x / Tile::SIZE).round(),
+            -(transform.translation.y / Tile::SIZE).round(),
+        );
+
+        if coordinates.0 >= 0.0
+            && coordinates.1 >= 0.0
+            && (coordinates.1 as usize) < world.layout.len()
+            && (coordinates.0 as usize) < world.layout[coordinates.1 as usize].len()
+            && matches!(
+                world.layout[coordinates.1 as usize][coordinates.0 as usize],
+                Some(Tile::Wall)
+            )
+        {
+            commands.entity(entity).despawn_recursive();
+        }
     }
 }

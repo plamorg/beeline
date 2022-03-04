@@ -79,9 +79,9 @@ pub fn spawn_player(
     };
 
     let collision_shape = if upgrades.has_upgrade(Upgrade::Shrink) {
-        CollisionShape::new_rectangle(size.x / 2.0, size.y / 2.0)
+        CollisionShape::new_circle(Player::SIZE / 4.0)
     } else {
-        CollisionShape::new_rectangle(size.x, size.y)
+        CollisionShape::new_circle(Player::SIZE / 2.0)
     };
 
     // Spawn player
@@ -89,7 +89,7 @@ pub fn spawn_player(
         .spawn_bundle(AnimatedSprite::new(
             &mut animations,
             &mut textures,
-            &asset_server,
+            asset_server,
             AnimatedSpriteData {
                 path: "bee.png".into(),
                 frames: 6,
@@ -150,8 +150,8 @@ fn detect_collision(
         if let Ok(player) = player.get_single() {
             for enemy in enemies.iter() {
                 if player.is_collided_with(enemy) {
-                    state.set(AppState::Death).unwrap();
-                    return;
+                    //state.set(AppState::Death).unwrap();
+                    //return;
                 }
             }
             if let Ok(goal) = goal.get_single() {

@@ -1,6 +1,6 @@
 use crate::{
     camera,
-    enemy::{Enemy, Projectile},
+    enemy::{Enemy, Projectile, Wall},
     player,
     upgrades::UpgradeTracker,
     util::{AnimatedSprite, AnimatedSpriteData},
@@ -9,20 +9,16 @@ use crate::{
 use benimator::SpriteSheetAnimation;
 use bevy::prelude::*;
 use impacted::CollisionShape;
-use std::{
-    f32::consts::PI,
-    fs::File,
-    io::{self, BufRead, BufReader},
-    path::{Path, PathBuf},
-};
+use std::f32::consts::PI;
+use std::io;
 
 pub enum WorldType {
-    Level { index: usize, },
+    Level { index: usize },
     Endless,
 }
 
 #[derive(Component, Clone, Debug)]
-struct Spawner {
+pub struct Spawner {
     projectile: Projectile,
     timer: Timer,
 }
@@ -42,7 +38,7 @@ impl Spawner {
 }
 
 #[derive(Debug)]
-enum Tile {
+pub enum Tile {
     Wall,
     Spawner(Spawner),
     Trap,
@@ -50,7 +46,7 @@ enum Tile {
 }
 
 impl Tile {
-    const SIZE: f32 = 24.0;
+    pub const SIZE: f32 = 24.0;
 }
 
 #[derive(Component)]
@@ -60,12 +56,12 @@ pub struct GameWorld {
     pub world_type: WorldType,
     // Coordinates of the player's spawn location: (x, y)
     player_start_coordinates: (usize, usize),
-    layout: Vec<Vec<Option<Tile>>>,
+    pub layout: Vec<Vec<Option<Tile>>>,
 }
 
-pub const LEVELS: [(&'static str, &'static str); 2] = [
+pub const LEVELS: [(&str, &str); 2] = [
     ("Level 0", include_str!("../assets/levels/level0.tsv")),
-    ("Level 1", include_str!("../assets/levels/level1.tsv"))
+    ("Level 1", include_str!("../assets/levels/level1.tsv")),
 ];
 
 impl GameWorld {
@@ -100,9 +96,7 @@ impl GameWorld {
         }
 
         Ok(Self {
-            world_type: WorldType::Level {
-                index: level,
-            },
+            world_type: WorldType::Level { index: level },
             player_start_coordinates: start.unwrap_or((0, 0)),
             layout,
         })
@@ -180,15 +174,19 @@ fn spawn_world(
                     };
 
                     let path = format!("walls/{name}.png");
-                    commands.spawn_bundle(SpriteBundle {
-                        sprite: Sprite {
-                            custom_size: Some(tile_size),
-                            ..Sprite::default()
-                        },
-                        texture: asset_server.load(&path),
-                        transform,
-                        ..SpriteBundle::default()
-                    });
+                    commands
+                        .spawn_bundle(SpriteBundle {
+                            sprite: Sprite {
+                                custom_size: Some(tile_size),
+                                ..Sprite::default()
+                            },
+                            texture: asset_server.load(&path),
+                            transform,
+                            ..SpriteBundle::default()
+                        })
+                        .insert(CollisionShape::new_rectangle(tile_size.x, tile_size.y))
+                        .insert(Wall)
+                        .insert(Enemy);
                 }
                 Some(Tile::Spawner(spawner)) => match spawner.projectile {
                     Projectile::Missile => {
