@@ -157,6 +157,7 @@ fn detect_collision(
             for goal in goals.iter() {
                 if player.is_collided_with(goal) {
                     state.set(AppState::Victory).unwrap();
+                    return;
                 }
             }
         }
